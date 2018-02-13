@@ -10,8 +10,68 @@
 \section{Simultad coseno recursivo}
 \subsection{Pseudoc\'odigo}
 \begin{itemize}
-\item \textbf{Entrada:} vectores x, y
-\item \textbf{Salida:} la simultud coseno de de los vectores, calculado recursivo
-\item \textbf{Procesiamento:} Si los vectores estan validos (no nil y no solo 0s) calcula el productode los vectores recursivo (  
+	\item \textbf{Entrada:} vectores x, y
+	\item \textbf{Salida:} la simultud coseno de de los vectores, calculado recursivo
+	\item \textbf{Procesiamento:} Si los vectores estan validos (no nil y no solo 0s) calcula el productode los vectores recursivo. Despues dividie el producto por el producto de los raizes de los cuadrados de los vectores.
 \end{itemize}
+\subsection{Ejemplos}
+\begin{lstlisting}
+(sc-rec nil nil) -> nil
+(sc-rec (0 0) (1 2)) -> nil
+(sc-rec (1 1) (1 1)) -> 1 
+(sc-rec (-1 -1) (1 1)) -> -1 
+(sc-rec (1 0) (0 1)) -> 0 
+(sc-rec (5 7) (4 3)) -> 0.95 
+\end{lstlisting}
+\subsection{Comentarios}
+\begin{itemize}
+	\item A causa de errores de redondear, puede ser que los resultos no son exactos (por ejemplo 1.0000001 en lugar de 1)
+	\item La recursion multiplica los primeros dos elementes de los vectores y recurso en el resto hasta no hay mas y en el camino de vuelta summa los productos
+	\item Cuando un vector est nil o solo de 0s, nil esta retonado
+	\item Los cuadrados son calculado por el producto de el vector con su mismo
+\end{itemize}
+\section{Simultad coseno con mapcar}
+\subsection{Pseudoc\'odigo}
+\begin{itemize}
+	\item \textbf{Entrada:} vectores x, y
+	\item \textbf{Salida:} la simultud coseno de de los vectores, calculado con mapcar
+	\item \textbf{Procesiamento:} Si los vectores estan validos (no nil y no solo 0s) calcula el productode los vectores con mapcar. Despues dividie el producto por el producto de los raizes de los cuadrados de los vectores.
+\end{itemize}
+\subsection{Ejemplos}
+Como recursivo
+\subsection{Comentarios}
+\begin{itemize}
+	\item A causa de errores de redondear, puede ser que los resultos no son exactos (por ejemplo 1.0000001 en lugar de 1)
+	\item El producto de los vectores es calculado por una reduccion con '+' sobre un mapcar que multiplica todas las parejas de los vectores
+	\item Cuando un vector est nil o solo de 0s, nil esta retonado
+	\item Los cuadrados son calculado por el producto de el vector con su mismo
+\end{itemize}
+\section{sc-conf}
+\subsection{Pseudoc\'odigo}
+\begin{itemize}
+	\item \textbf{Entrada:} vector cat, vector de vectores vs, float conf
+	\item \textbf{Salida:} Vectores cuya simultad a cat es superior a conf, ordenados
+	\item \textbf{Procesiamento:} Por cada vector de vs, calcula la simultad coseno con cat, despues excluye los resultos que son mas peque\~nos que la confianza y ordena la lista
+\end{itemize}
+\subsection{Ejemplos}
+\begin{lstlisting}
+(sc-conf '(1 2 3) '((1 2 3) (0 1 0) (4 5 6)) 0.7) -> (0.97463 0.99999)
+\end{lstlisting}
+\subsection{Comentarios}
+\begin{itemize}
+	\item Como con los otros, errores de redondear eran posible
+\end{itemize}
+\section{sc classifier}
+\subsection{Pseudoc\'odigo}
+\begin{itemize}
+	\item \textbf{Entrada:} vectores de vectores cats, texts; funci\'on func
+	\item \textbf{Salida:} Por cado texto, la categoria que tiene el simultad coseno maximo y ese resultado)
+	\item \textbf{Procesiamento:} Por cada vector de texto, calcula todas las scs con la funcion indicada por las categorias y retorna el identificador y el resulto de la categoria con sc maxima.
+\end{itemize}
+\subsection{Ejemplos}
+\begin{lstlisting}
+(sc-classifier '((0 1 2 3 4) (1 3 2 2 0) (2 3 5 8 0)) '((0 1 2 3 4) (1 3 2 1 0) (2 1 1 1 1)) 'sc-mapcar) -> ((0 . 0.99999994) (1 . 0.97230554) (0 . 0.9128709))
+\end{lstlisting}
+\subsection{Comentarios}
+Como puede observar, calcular las scs es mas rapido con mapcar, pero necesita mas espacio.
 \end{document}

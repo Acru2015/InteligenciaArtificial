@@ -10,17 +10,18 @@
 (write (check-valid nil))
 (write-line "")
 
-(defun array_mult (x y)
+(defun array-mult (x y)
   (if (null x)
     0 
-    (+ (* (first x) (first y)) (array_mult (rest x) (rest y)))))
+    (+ (* (first x) (first y)) (array-mult (rest x) (rest y)))))
 
-(defun array_square (x) (array_mult x x))
+(defun array_square (x) (array-mult x x))
 
 (defun sc-rec (x y)
   (if (and (check-valid x) (check-valid y))
-    (/ (array_mult x y) (* (sqrt (array_square x)) (sqrt(array_square y))))))
+    (/ (array-mult x y) (* (sqrt (array_square x)) (sqrt(array_square y))))))
 
+(write-line "Sc rec")
 (write (sc-rec '(3 4) '(3 4)))
 (write-line "")
 (write (sc-rec '(-1 -1) '(1 1)))
@@ -29,17 +30,20 @@
 (write-line "")
 (write (sc-rec '(0 0) '(1 0)))
 (write-line "")
+(write (sc-rec '(5 7) '(4 3)))
+(write-line "")
 
-(defun map_mult (x y)
+(defun map-mult (x y)
   (reduce '+ (mapcar '* x y)))
 
-(defun map_square (x)
-  (map_mult x x))
+(defun map-square (x)
+  (map-mult x x))
 
 (defun sc-mapcar (x y)
   (if (and (check-valid x) (check-valid y))
-    (/ (map_mult x y) (* (sqrt (map_square x)) (sqrt (map_square y))))))
+    (/ (map-mult x y) (* (sqrt (map-square x)) (sqrt (map-square y))))))
 
+(write-line "Sc map")
 (write (sc-mapcar '(3 4) '(3 4)))
 (write-line "")
 (write (sc-mapcar  '(-1 -1) '(1 1)))
@@ -53,21 +57,7 @@
 (write (get-sims '(1 2 3) '((1 2 3) (0 1 0) (4 5 6))))
 (write-line "")
 
-(defun filter (x conf)
-  (remove-if (lambda (elem) (< elem conf)) x))
-
-(write (filter '(0 5 10 3 4) 4))
-(write-line "")
-
-(defun get-filtered-sims (x vs conf)
-  (filter (get-sims x vs) conf))
-
-(defun sc-conf (cat vs conf)
-  (sort (get-filtered-sims cat vs conf) '<))
-
-(write (sc-conf '(1 2 3) '((1 2 3) (0 1 0) (4 5 6)) 0.7))
-(write-line "")
-
+(write-line "Simularities")
 (write (get-sims '(1 2 3) '((1 2 3) (0 1 0) (4 5 6))))
 (write-line "")
 
@@ -77,12 +67,17 @@
 (write (filter '(0 5 10 3 4) 4))
 (write-line "")
 
+(write-line "Filter")
+(write (filter '(0 5 10 3 4) 4))
+(write-line "")
+
 (defun get-filtered-sims (x vs conf)
   (filter (get-sims x vs) conf))
 
 (defun sc-conf (cat vs conf)
   (sort (get-filtered-sims cat vs conf) '<))
 
+(write-line "Sc conf")
 (write (sc-conf '(1 2 3) '((1 2 3) (0 1 0) (4 5 6)) 0.7))
 (write-line "")
 

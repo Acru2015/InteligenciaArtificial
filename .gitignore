@@ -3,6 +3,7 @@
 
 ### CommonLisp ###
 *.FASL
+*.fas
 *.fasl
 *.lisp-temp
 *.dfsl

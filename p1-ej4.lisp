@@ -43,20 +43,20 @@
   ;;
   ;; 4.1.1 Completa el codigo
   ;;
-  )
+  (and (atom x) (not (truth-value-p x)) (not (connector-p x))))
 
 ;; EJEMPLOS:
-(positive-literal-p 'p)
+(print "positive-literal-p")
+(print (positive-literal-p 'p))
 ;; evalua a T
-(positive-literal-p T)
-(positive-literal-p NIL)
-(positive-literal-p '¬)
-(positive-literal-p '=>)
-(positive-literal-p '(p))
-(positive-literal-p '(¬ p))
-(positive-literal-p '(¬ (v p q)))
+(print (positive-literal-p T))
+(print (positive-literal-p NIL))
+(print (positive-literal-p '¬))
+(print (positive-literal-p '=>))
+(print (positive-literal-p '(p)))
+(print (positive-literal-p '(¬ p)))
+(print (positive-literal-p '(¬ (v p q))))
 ;; evaluan a NIL
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.1.2
@@ -71,21 +71,22 @@
   ;;
   ;; 4.1.2 Completa el codigo
   ;;
-  )
+  (and (listp x) (unary-connector-p (car x)) (positive-literal-p (cadr x))))
 
 ;; EJEMPLOS:
-(negative-literal-p '(¬ p))        ; T
-(negative-literal-p NIL)           ; NIL
-(negative-literal-p '¬)            ; NIL
-(negative-literal-p '=>)           ; NIL
-(negative-literal-p '(p))          ; NIL
-(negative-literal-p '((¬ p)))      ; NIL
-(negative-literal-p '(¬ T))        ; NIL
-(negative-literal-p '(¬ NIL))      ; NIL
-(negative-literal-p '(¬ =>))       ; NIL
-(negative-literal-p 'p)            ; NIL
-(negative-literal-p '((¬ p)))      ; NIL
-(negative-literal-p '(¬ (v p q)))  ; NIL
+(print "negative-literal-p")
+(print (negative-literal-p '(¬ p)))        ; T
+(print (negative-literal-p NIL))           ; NIL
+(print (negative-literal-p '¬))            ; NIL
+(print (negative-literal-p '=>))           ; NIL
+(print (negative-literal-p '(p)))          ; NIL
+(print (negative-literal-p '((¬ p))))      ; NIL
+(print (negative-literal-p '(¬ T)))        ; NIL
+(print (negative-literal-p '(¬ NIL)))      ; NIL
+(print (negative-literal-p '(¬ =>)))       ; NIL
+(print (negative-literal-p 'p))            ; NIL
+(print (negative-literal-p '((¬ p))))      ; NIL
+(print (negative-literal-p '(¬ (v p q))))  ; NIL
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -100,14 +101,15 @@
   ;;
   ;; 4.1.3 Completa el codigo
   ;;
-  )
+  (or (positive-literal-p x) (negative-literal-p x)))
 
 ;; EJEMPLOS:
-(literal-p 'p)             
-(literal-p '(¬ p))      
+(print "literal-p")
+(print (literal-p 'p))             
+(print (literal-p '(¬ p)))      
 ;;; evaluan a T
-(literal-p '(p))
-(literal-p '(¬ (v p q)))
+(print (literal-p '(p)))
+(print (literal-p '(¬ (v p q))))
 ;;; evaluan a  NIL
 
 
@@ -120,40 +122,42 @@
 (defun wff-prefix-p (x)
   (unless (null x)             ;; NIL no es FBF en formato prefijo (por convencion)
     (or (literal-p x)          ;; Un literal es FBF en formato prefijo
-        (and (listp x)         ;; En caso de que no sea un literal debe ser una lista
-             (let ((connector (first x))
-                   (rest_1    (rest  x)))
-               (cond
-                ((unary-connector-p connector)  ;; Si el primer elemento es un connector unario
-                 (and (null (rest rest_1))      ;; deberia tener la estructura (<conector> FBF)
-                      (wff-prefix-p (first rest_1)))) 
-                ((binary-connector-p connector) ;; Si el primer elemento es un conector binario
-                 (let ((rest_2 (rest rest_1)))  ;; deberia tener la estructura 
-                   (and (null (rest rest_2))    ;; (<conector> FBF1 FBF2)
-                        (wff-prefix-p (first rest_1))
-                        (wff-prefix-p (first rest_2)))))               
-                ((n-ary-connector-p connector)  ;; Si el primer elemento es un conector enario
-                 (or (null rest_1)              ;; conjuncion o disyuncion vacias
-                     (and (wff-prefix-p (first rest_1)) ;; tienen que ser FBF los operandos 
-                          (let ((rest_2 (rest rest_1)))
-                            (or (null rest_2)           ;; conjuncion o disyuncion con un elemento
-                                (wff-prefix-p (cons connector rest_2)))))))	
-                (t NIL)))))))                   ;; No es FBF en formato prefijo 
+	(and (listp x)         ;; En caso de que no sea un literal debe ser una lista
+	     (let ((connector (first x))
+		   (rest_1    (rest  x)))
+	       (cond
+		 ((unary-connector-p connector)  ;; Si el primer elemento es un connector unario
+		  (and (null (rest rest_1))      ;; deberia tener la estructura (<conector> FBF)
+		       (wff-prefix-p (first rest_1)))) 
+		 ((binary-connector-p connector) ;; Si el primer elemento es un conector binario
+		  (let ((rest_2 (rest rest_1)))  ;; deberia tener la estructura 
+		    (and (null (rest rest_2))    ;; (<conector> FBF1 FBF2)
+			 (wff-prefix-p (first rest_1))
+			 (wff-prefix-p (first rest_2)))))               
+		 ((n-ary-connector-p connector)  ;; Si el primer elemento es un conector enario
+		  (or (null rest_1)              ;; conjuncion o disyuncion vacias
+		      (and (wff-prefix-p (first rest_1)) ;; tienen que ser FBF los operandos 
+			   (let ((rest_2 (rest rest_1)))
+			     (or (null rest_2)           ;; conjuncion o disyuncion con un elemento
+				 (wff-prefix-p (cons connector rest_2)))))))	
+		 (t NIL)))))))                   ;; No es FBF en formato prefijo 
 ;;
 ;; EJEMPLOS:
-(wff-prefix-p '(v))
-(wff-prefix-p '(^))
-(wff-prefix-p '(v A))
-(wff-prefix-p '(^ (¬ B)))
-(wff-prefix-p '(v A (¬ B)))
-(wff-prefix-p '(v (¬ B) A ))
-(wff-prefix-p '(^ (V P (=> A (^ B (¬ C) D))) (^ (<=> P (¬ Q)) P) E))
+(print "wff prefix true")
+(print (wff-prefix-p '(v)))
+(print (wff-prefix-p '(^)))
+(print (wff-prefix-p '(v A)))
+(print (wff-prefix-p '(^ (¬ B))))
+(print (wff-prefix-p '(v A (¬ B))))
+(print (wff-prefix-p '(v (¬ B) A )))
+(print (wff-prefix-p '(^ (V P (=> A (^ B (¬ C) D))) (^ (<=> P (¬ Q)) P) E)))
 ;;; evaluan a T
-(wff-prefix-p 'NIL)
-(wff-prefix-p '(¬))
-(wff-prefix-p '(=>))
-(wff-prefix-p '(<=>))
-(wff-prefix-p '(^ (V P (=> A ( B ^ (¬ C) ^ D))) (^ (<=> P (¬ Q)) P) E))
+(print "wff prefix false")
+(print (wff-prefix-p 'NIL))
+(print (wff-prefix-p '(¬)))
+(print (wff-prefix-p '(=>)))
+(print (wff-prefix-p '(<=>)))
+(print (wff-prefix-p '(^ (V P (=> A ( B ^ (¬ C) ^ D))) (^ (<=> P (¬ Q)) P) E)))
 ;;; evaluan a NIL
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -161,43 +165,68 @@
 ;; Predicado para determinar si una expresion esta en formato prefijo 
 ;;
 ;; RECIBE   : expresion x 
-;; EVALUA A : T si x esta en formato prefijo, 
+;; EVALUA A : T si x esta en formato infijo, 
 ;;            NIL en caso contrario. 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun wff-infix-p (x)
   ;;
   ;; 4.1.4 Completa el codigo
   ;;
-  ) 
+  (unless (null x)             ;; NIL no es FBF en formato infijo (por convencion)
+    (or (literal-p x)          ;; Un literal es FBF en formato infijo 
+	(and (listp x)         ;; En caso de que no sea un literal debe ser una lista
+	     (cond
+	       ((unary-connector-p (first x))  ;; Si el primer elemento es un connector unario
+		(and (null (rest (rest x)))      ;; deberia tener la estructura (<conector> FBF)
+		     (wff-infix-p (second x)))) 
+	       ((binary-connector-p (second x)) ;; Si el primer elemento es un conector binario
+		;; deberia tener la estructura 
+		(and (null (rest (rest (rest x))))    ;; (FBF1 <conector> FBF2)
+		     (wff-infix-p (first x))
+		     (wff-infix-p (third x))))               
+	       ((n-ary-connector-p (first x))	;; conjuncion o disyuncion vacias
+		(null (rest x)))
+	       ((n-ary-connector-p (second x))  ;; Si el primer elemento es un conector enario
+		(and (or (null (fourth x)) (equal (second x) (fourth x)))
+		     (wff-infix-p (first x)) ;; tienen que ser FBF los operandos 
+		     (wff-infix-p (first (rest (rest x))))))
+	       (t NIL))))))                  ;; No es FBF en formato prefijo 
 
 ;;
 ;; EJEMPLOS:
 ;;
-(wff-infix-p 'a) 						; T
-(wff-infix-p '(^)) 					; T  ;; por convencion
-(wff-infix-p '(v)) 					; T  ;; por convencion
-(wff-infix-p '(A ^ (v))) 			      ; T  
-(wff-infix-p '( a ^ b ^ (p v q) ^ (¬ r) ^ s))  	; T 
-(wff-infix-p '(A => B)) 				; T
-(wff-infix-p '(A => (B <=> C))) 			; T
-(wff-infix-p '( B => (A ^ C ^ D))) 			; T   
-(wff-infix-p '( B => (A ^ C))) 			; T 
-(wff-infix-p '( B ^ (A ^ C))) 			; T 
-(wff-infix-p '((p v (a => (b ^ (¬ c) ^ d))) ^ ((p <=> (¬ q)) ^ p ) ^ e))  ; T 
-(wff-infix-p nil) 					; NIL
-(wff-infix-p '(a ^)) 					; NIL
-(wff-infix-p '(^ a)) 					; NIL
-(wff-infix-p '(a)) 					; NIL
-(wff-infix-p '((a))) 				      ; NIL
-(wff-infix-p '((a) b))   			      ; NIL
-(wff-infix-p '(^ a b q (¬ r) s))  		      ; NIL 
-(wff-infix-p '( B => A C)) 			      ; NIL   
-(wff-infix-p '( => A)) 				      ; NIL   
-(wff-infix-p '(A =>)) 				      ; NIL   
-(wff-infix-p '(A => B <=> C)) 		      ; NIL
-(wff-infix-p '( B => (A ^ C v D))) 		      ; NIL   
-(wff-infix-p '( B ^ C v D )) 			      ; NIL 
-(wff-infix-p '((p v (a => e (b ^ (¬ c) ^ d))) ^ ((p <=> (¬ q)) ^ p ) ^ e)); NIL 
+(print "Wff infix true")
+(print (wff-infix-p 'a)) 						; T
+(print (wff-infix-p '(^))) 					; T  ;; por convencion
+(print (wff-infix-p '(v))) 					; T  ;; por convencion
+(print (wff-infix-p '(¬ c))) 						; T
+(print (wff-infix-p '(A ^ (v)))) 			      ; T  
+(print (wff-infix-p '(A ^ (p v q)))) 			      ; T  
+(print (wff-infix-p '( a ^ b ^ (p v q) ^ (¬ r) ^ s)))  	; T 
+(print (wff-infix-p '(A => B))) 				; T
+(print (wff-infix-p '(A => (B <=> C)))) 			; T
+(print (wff-infix-p '( B => (A ^ C ^ D)))) 			; T   
+(print (wff-infix-p '( B => (A ^ C)))) 			; T 
+(print (wff-infix-p '( B ^ (A ^ C)))) 			; T 
+(print (wff-infix-p '((p v (a => (b ^ (¬ c) ^ d))) ^ ((p <=> (¬ q)) ^ p ) ^ e)))  ; T 
+(print "Wff infix false")
+(print (wff-infix-p nil)) 					; NIL
+(print (wff-infix-p '(a ^))) 					; NIL
+(print (wff-infix-p '(^ a))) 					; NIL
+(print (wff-infix-p '(A ^ v))) 			      ; NIL 
+(print (wff-infix-p '(c ¬))) 						; NIL
+(print (wff-infix-p '(c ¬ c))) 						; NIL
+(print (wff-infix-p '(a))) 					; NIL
+(print (wff-infix-p '((a)))) 				      ; NIL
+(print (wff-infix-p '((a) b)))   			      ; NIL
+(print (wff-infix-p '(^ a b q (¬ r) s)))  		      ; NIL 
+(print (wff-infix-p '( B => A C))) 			      ; NIL   
+(print (wff-infix-p '( => A))) 				      ; NIL   
+(print (wff-infix-p '(A =>))) 				      ; NIL   
+(print (wff-infix-p '(A => B <=> C))) 		      ; NIL
+(print (wff-infix-p '( B => (A ^ C v D)))) 		      ; NIL   
+(print (wff-infix-p '( B ^ C v D ))) 			      ; NIL 
+(print (wff-infix-p '((p v (a => e (b ^ (¬ c) ^ d))) ^ ((p <=> (¬ q)) ^ p ) ^ e))); NIL 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Convierte FBF en formato prefijo a FBF en formato infijo
@@ -208,26 +237,26 @@
 (defun prefix-to-infix (wff)
   (when (wff-prefix-p wff)
     (if (literal-p wff)
-        wff
+      wff
       (let ((connector      (first wff))
-            (elements-wff (rest wff)))
-        (cond
-         ((unary-connector-p connector) 
-          (list connector (prefix-to-infix (second wff))))
-         ((binary-connector-p connector) 
-          (list (prefix-to-infix (second wff))
-                connector
-                (prefix-to-infix (third wff))))
-         ((n-ary-connector-p connector) 
-          (cond 
-           ((null elements-wff)        ;;; conjuncion o disyuncion vacias. 
-            wff)                       ;;; por convencion, se acepta como fbf en formato infijo
-           ((null (cdr elements-wff))  ;;; conjuncion o disyuncion con un unico elemento
-            (prefix-to-infix (car elements-wff)))  
-           (t (cons (prefix-to-infix (first elements-wff)) 
-                    (mapcan #'(lambda(x) (list connector (prefix-to-infix x))) 
-                      (rest elements-wff))))))
-         (t NIL)))))) ;; no deberia llegar a este paso nunca
+	    (elements-wff (rest wff)))
+	(cond
+	  ((unary-connector-p connector) 
+	   (list connector (prefix-to-infix (second wff))))
+	  ((binary-connector-p connector) 
+	   (list (prefix-to-infix (second wff))
+		 connector
+		 (prefix-to-infix (third wff))))
+	  ((n-ary-connector-p connector) 
+	   (cond 
+	     ((null elements-wff)        ;;; conjuncion o disyuncion vacias. 
+	      wff)                       ;;; por convencion, se acepta como fbf en formato infijo
+	     ((null (cdr elements-wff))  ;;; conjuncion o disyuncion con un unico elemento
+	      (prefix-to-infix (car elements-wff)))  
+	     (t (cons (prefix-to-infix (first elements-wff)) 
+		      (mapcan #'(lambda(x) (list connector (prefix-to-infix x))) 
+			      (rest elements-wff))))))
+	  (t NIL)))))) ;; no deberia llegar a este paso nunca
 
 ;;
 ;;  EJEMPLOS:
@@ -245,6 +274,7 @@
 (prefix-to-infix '(^ (^ (<=> p (¬ q)) p ) e))     ; (((P <=> (¬ Q)) ^ P) ^ E)  
 (prefix-to-infix '( v (¬ p) q (¬ r) (¬ s)))       ; ((¬ P) V Q V (¬ R) V (¬ S))
 
+#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.1.5
 ;;
@@ -279,13 +309,13 @@
 
 
 (infix-to-prefix
- (prefix-to-infix
-  '(V (¬ P) Q (¬ R) (¬ S))))
+  (prefix-to-infix
+    '(V (¬ P) Q (¬ R) (¬ S))))
 ;;-> (V (¬ P) Q (¬ R) (¬ S))
 
 (infix-to-prefix
- (prefix-to-infix
-  '(¬ (V (¬ P) Q (¬ R) (¬ S)))))
+  (prefix-to-infix
+    '(¬ (V (¬ P) Q (¬ R) (¬ S)))))
 ;;-> (¬ (V (¬ P) Q (¬ R) (¬ S)))
 
 
@@ -387,16 +417,16 @@
 
 (defun eliminate-biconditional (wff)
   (if (or (null wff) (literal-p wff))
-      wff
+    wff
     (let ((connector (first wff)))
       (if (eq connector +bicond+)
-          (let ((wff1 (eliminate-biconditional (second wff)))
-                (wff2 (eliminate-biconditional (third  wff))))
-            (list +and+ 
-                  (list +cond+ wff1 wff2)
-                  (list +cond+ wff2 wff1)))
-        (cons connector 
-              (mapcar #'eliminate-biconditional (rest wff)))))))
+	(let ((wff1 (eliminate-biconditional (second wff)))
+	      (wff2 (eliminate-biconditional (third  wff))))
+	  (list +and+ 
+		(list +cond+ wff1 wff2)
+		(list +cond+ wff2 wff1)))
+	(cons connector 
+	      (mapcar #'eliminate-biconditional (rest wff)))))))
 
 ;;
 ;; EJEMPLOS:
@@ -448,9 +478,9 @@
 
 (defun exchange-and-or (connector)
   (cond
-   ((eq connector +and+) +or+)    
-   ((eq connector +or+) +and+)
-   (t connector)))
+    ((eq connector +and+) +or+)    
+    ((eq connector +or+) +and+)
+    (t connector)))
 
 ;;
 ;;  EJEMPLOS:
@@ -475,52 +505,52 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun combine-elt-lst (elt lst)
   (if (null lst)
-      (list (list elt))
+    (list (list elt))
     (mapcar #'(lambda (x) (cons elt x)) lst)))
 
 (defun exchange-NF (nf)
   (if (or (null nf) (literal-p nf)) 
-      nf
+    nf
     (let ((connector (first nf)))
       (cons (exchange-and-or connector)
-            (mapcar #'(lambda (x)
-                          (cons connector x))
-                (exchange-NF-aux (rest nf)))))))
+	    (mapcar #'(lambda (x)
+			(cons connector x))
+		    (exchange-NF-aux (rest nf)))))))
 
 (defun exchange-NF-aux (nf)
   (if (null nf) 
-      NIL
+    NIL
     (let ((lst (first nf)))
       (mapcan #'(lambda (x) 
-                  (combine-elt-lst 
-                   x 
-                   (exchange-NF-aux (rest nf)))) 
-        (if (literal-p lst) (list lst) (rest lst))))))
+		  (combine-elt-lst 
+		    x 
+		    (exchange-NF-aux (rest nf)))) 
+	      (if (literal-p lst) (list lst) (rest lst))))))
 
 (defun simplify (connector lst-wffs )
   (if (literal-p lst-wffs)
-      lst-wffs                    
+    lst-wffs                    
     (mapcan #'(lambda (x) 
-                (cond 
-                 ((literal-p x) (list x))
-                 ((equal connector (first x))
-                  (mapcan 
-                      #'(lambda (y) (simplify connector (list y))) 
-                    (rest x))) 
-                 (t (list x))))               
-      lst-wffs)))
+		(cond 
+		  ((literal-p x) (list x))
+		  ((equal connector (first x))
+		   (mapcan 
+		     #'(lambda (y) (simplify connector (list y))) 
+		     (rest x))) 
+		  (t (list x))))               
+	    lst-wffs)))
 
 (defun cnf (wff)
   (cond
-   ((cnf-p wff) wff)
-   ((literal-p wff)
-    (list +and+ (list +or+ wff)))
-   ((let ((connector (first wff))) 
-      (cond
-       ((equal +and+ connector) 
-        (cons +and+ (simplify +and+ (mapcar #'cnf (rest wff)))))
-       ((equal +or+ connector) 
-        (cnf (exchange-NF (cons +or+ (simplify +or+ (rest wff)))))))))))
+    ((cnf-p wff) wff)
+    ((literal-p wff)
+     (list +and+ (list +or+ wff)))
+    ((let ((connector (first wff))) 
+       (cond
+	 ((equal +and+ connector) 
+	  (cons +and+ (simplify +and+ (mapcar #'cnf (rest wff)))))
+	 ((equal +or+ connector) 
+	  (cnf (exchange-NF (cons +or+ (simplify +or+ (rest wff)))))))))))
 
 
 (cnf 'a)
@@ -535,7 +565,7 @@
 (cnf '(^ (v a b (^ y r s)) c (¬ d) (^ e f (v h i) (^ o p))))
 (cnf '(^ (^ y r s (^ p q (v c d))) (v a b)))
 (print (cnf '(^ (v (¬ a) b c) (¬ e) r s 
-                (v e f (¬ g) h) k (v m n) d)))
+		(v e f (¬ g) h) k (v m n) d)))
 ;;
 (cnf '(^ (v p (¬ q)) (v k r (^ m  n))))
 (print  (cnf '(v (v p q) e f (^ r  m) n (^ a (¬ b) c) (^ d s))))
@@ -559,8 +589,8 @@
 ;;;    (V P Q E F M N C D)      (V P Q E F M N C S))
 ;;;
 (print 
- (cnf '(^ (^ (¬ y) (v r (^ s (¬ x)) 
-                      (^ (¬ p) m (v c d)))(v (¬ a) (¬ b))) g)))
+  (cnf '(^ (^ (¬ y) (v r (^ s (¬ x)) 
+			 (^ (¬ p) m (v c d)))(v (¬ a) (¬ b))) g)))
 ;;;(^ (V (¬ Y)) (V R S (¬ P)) (V R S M) 
 ;;;   (V R S C D) (V R (¬ X) (¬ P)) 
 ;;;   (V R (¬ X) M) (V R (¬ X) C D)
@@ -586,7 +616,7 @@
 (eliminate-connectors 'nil)
 (eliminate-connectors (cnf '(^ (v p  (¬ q))  (v k  r  (^ m  n)))))
 (eliminate-connectors
- (cnf '(^ (v (¬ a) b c) (¬ e) (^ e f (¬ g) h) (v m n) (^ r s q) (v u q) (^ x y))))
+  (cnf '(^ (v (¬ a) b c) (¬ e) (^ e f (¬ g) h) (v m n) (^ r s q) (v u q) (^ x y))))
 
 (eliminate-connectors (cnf '(v p  q  (^ r  m)  (^ n  q)  s )))
 (eliminate-connectors (print (cnf '(^ (v p  (¬ q)) (¬ a) (v k  r  (^ m  n))))))
@@ -680,7 +710,7 @@
   ;; 4.3.3 Completa el codigo
   ;;
   )
-  
+
 ;;
 ;;  EJEMPLOS:
 ;;
@@ -712,19 +742,19 @@
   ;;
   ;; 4.3.4 Completa el codigo
   ;;
-)
+  )
 
 ;;
 ;;  EJEMPLOS:
 ;;
 (eliminate-subsumed-clauses 
- '((a b c) (b c) (a (¬ c) b)  ((¬ a) b) (a b (¬ a)) (c b a)))
+  '((a b c) (b c) (a (¬ c) b)  ((¬ a) b) (a b (¬ a)) (c b a)))
 ;;; ((A (¬ C) B) ((¬ A) B) (B C)) ;; el orden no es importante
 (eliminate-subsumed-clauses
- '((a b c) (b c) (a (¬ c) b) (b)  ((¬ a) b) (a b (¬ a)) (c b a)))
+  '((a b c) (b c) (a (¬ c) b) (b)  ((¬ a) b) (a b (¬ a)) (c b a)))
 ;;; ((B))
 (eliminate-subsumed-clauses
- '((a b c) (b c) (a (¬ c) b) ((¬ a))  ((¬ a) b) (a b (¬ a)) (c b a)))
+  '((a b c) (b c) (a (¬ c) b) ((¬ a))  ((¬ a) b) (a b (¬ a)) (c b a)))
 ;;; ((A (¬ C) B) ((¬ A)) (B C))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -764,7 +794,7 @@
 ;;  EJEMPLOS:
 ;;
 (eliminate-tautologies 
- '(((¬ b) a) (a (¬ a) b c) ( a (¬ b)) (s d (¬ s) (¬ s)) (a)))
+  '(((¬ b) a) (a (¬ a) b c) ( a (¬ b)) (s d (¬ s) (¬ s)) (a)))
 ;; (((¬ B) A) (A (¬ B)) (A))
 
 (eliminate-tautologies '((a (¬ a) b c)))
@@ -815,7 +845,7 @@
 ;;  EJEMPLOS:
 ;;
 (extract-neutral-clauses 'p
-                           '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
+			 '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
 ;; ((R (¬ S) Q) ((¬ R) S))
 
 
@@ -826,11 +856,11 @@
 ;; (NIL)
 
 (extract-neutral-clauses 'r
-                           '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
+			 '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
 ;; ((P Q) (A B P) (A (¬ P) C))
 
 (extract-neutral-clauses 'p
-                           '((p (¬ q) r) (p q) (r (¬ s) p q) (a b p) (a (¬ p) c) ((¬ r) p s)))
+			 '((p (¬ q) r) (p q) (r (¬ s) p q) (a b p) (a (¬ p) c) ((¬ r) p s)))
 ;; NIL
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -852,7 +882,7 @@
 ;;  EJEMPLOS:
 ;;
 (extract-positive-clauses 'p
-                             '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
+			  '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
 
 ;; ((P (¬ Q) R) (P Q) (A B P))
 
@@ -862,10 +892,10 @@
 (extract-positive-clauses 'r '(NIL))
 ;; NIL
 (extract-positive-clauses 'r
-                             '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
+			  '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
 ;; ((P (¬ Q) R) (R (¬ S) Q))
 (extract-positive-clauses 'p
-                             '(((¬ p) (¬ q) r) ((¬ p) q) (r (¬ s) (¬ p) q) (a b (¬ p)) ((¬ r) (¬ p) s)))
+			  '(((¬ p) (¬ q) r) ((¬ p) q) (r (¬ s) (¬ p) q) (a b (¬ p)) ((¬ r) (¬ p) s)))
 ;; NIL
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -887,7 +917,7 @@
 ;;  EJEMPLOS:
 ;;
 (extract-negative-clauses 'p
-                             '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
+			  '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
 ;; ((A (¬ P) C))
 
 (extract-negative-clauses 'r NIL)
@@ -895,10 +925,10 @@
 (extract-negative-clauses 'r '(NIL))
 ;; NIL
 (extract-negative-clauses 'r
-                             '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
+			  '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
 ;; (((¬ R) S))
 (extract-negative-clauses 'p
-                             '(( p (¬ q) r) ( p q) (r (¬ s) p q) (a b p) ((¬ r) p s)))
+			  '(( p (¬ q) r) ( p q) (r (¬ s) p q) (a b p) ((¬ r) p s)))
 ;; NIL
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -957,7 +987,7 @@
   ;;
   ;; 4.4.5 Completa el codigo
   ;;
-)
+  )
 
 ;;
 ;;  EJEMPLOS:
@@ -1003,9 +1033,9 @@
 (RES-SAT-p nil)  ;;; T
 (RES-SAT-p '((p) ((¬ q)))) ;;; T 
 (RES-SAT-p
- '((a b d) ((¬ p) q) ((¬ c) a b) ((¬ b) (¬ p) d) (c d (¬ a)))) ;;; T 
+  '((a b d) ((¬ p) q) ((¬ c) a b) ((¬ b) (¬ p) d) (c d (¬ a)))) ;;; T 
 (RES-SAT-p
- '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) ((¬ q)) ((¬ p) (¬ q) r))) ;;;T
+  '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) ((¬ q)) ((¬ p) (¬ q) r))) ;;;T
 ;;
 ;; UNSAT Examples
 ;;
@@ -1013,7 +1043,7 @@
 (RES-SAT-p '((S) nil))     ;;; NIL 
 (RES-SAT-p '((p) ((¬ p)))) ;;; NIL
 (RES-SAT-p
- '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) (p) (q) ((¬ r)) ((¬ p) (¬ q) r))) ;;; NIL
+  '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) (p) (q) ((¬ r)) ((¬ p) (¬ q) r))) ;;; NIL
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.6:
@@ -1052,44 +1082,44 @@
 ;; NIL
 
 (logical-consequence-RES-SAT-p 
- '(((¬ p) => q) ^ (p => (a v (¬ b))) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
- '(¬ a))
+  '(((¬ p) => q) ^ (p => (a v (¬ b))) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+  '(¬ a))
 ;; T
 
 (logical-consequence-RES-SAT-p 
- '(((¬ p) => q) ^ (p => (a v (¬ b))) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
- 'a)
+  '(((¬ p) => q) ^ (p => (a v (¬ b))) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+  'a)
 ;; T
 
 (logical-consequence-RES-SAT-p 
- '(((¬ p) => q) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
- 'a)
+  '(((¬ p) => q) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+  'a)
 ;; NIL
 
 (logical-consequence-RES-SAT-p 
- '(((¬ p) => q) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
- '(¬ a))
+  '(((¬ p) => q) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+  '(¬ a))
 ;; T
 
 (logical-consequence-RES-SAT-p 
- '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
- 'q)
+  '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+  'q)
 ;; NIL
 
 (logical-consequence-RES-SAT-p 
- '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
- '(¬ q))
+  '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+  '(¬ q))
 ;; NIL
 
 (or 
- (logical-consequence-RES-SAT-p '((p => q) ^ p) '(¬q))      ;; NIL
- (logical-consequence-RES-SAT-p 
-  '(((¬ p) => q) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
-  'a) ;; NIL
- (logical-consequence-RES-SAT-p 
-  '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
-  'q) ;; NIL
- (logical-consequence-RES-SAT-p 
-  '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
-  '(¬ q)))
-
+  (logical-consequence-RES-SAT-p '((p => q) ^ p) '(¬q))      ;; NIL
+  (logical-consequence-RES-SAT-p 
+    '(((¬ p) => q) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+    'a) ;; NIL
+  (logical-consequence-RES-SAT-p 
+    '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+    'q) ;; NIL
+  (logical-consequence-RES-SAT-p 
+    '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+    '(¬ q)))
+|#

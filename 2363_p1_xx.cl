@@ -208,7 +208,7 @@
 (write-line "")
 
 (defun combine-elt-lst (-elt lst)
-  (mapcar #'(lambda(elem) (list -elt elem)) lst))
+  (mapcar #'(lambda(elem) (append (list -elt) elem)) lst))
 
 (write-line "combine-elt-lst")
 (write (combine-elt-lst 'a nil))
@@ -239,6 +239,13 @@
 
 (defun combine-list-of-lsts (lstolsts)
   (rec-combine (first lstolsts) (rest lstolsts)))
+
+#|
+(defun combine-list-of-lsts (lstolst)
+  (if (null (rest (rest lstolst)))
+    (combine-lst-lst (car lstolst) (car (cdr lstolst)))
+    (mapcan (combine-list-of-lsts (rest lstolst)) (first lstolst))))
+|#
 
 ;(defun combine-list-of-lsts (lstolsts)
 ;  (mapcar #'(lambda (elem) (combine-elt-lst elem (second lstolsts))) (first lstolsts)))

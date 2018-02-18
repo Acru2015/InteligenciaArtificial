@@ -1,0 +1,41 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;; EJERCICIO 3.1
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;; Define una función que combine un elemento dado con todos los elementos de una lista
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun combine-elt-lst (elt lst) 
+	(if (null lst) 
+		nil
+	(cons (cons elt (car lst)) (combine-elt-lst elt (cdr lst)))))
+
+
+;;>> (combine-elt-lst 'a nil)
+;;NIL
+;;>> (combine-elt-lst 'a '(1 2 3))
+;;((A 1) (A 2) (A 3))
+
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;; EJERCICIO 3.2
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;; Diseña una función que calcule el producto cartesiano de dos listas
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun combine-lst-lst (lst1 lst2)  
+	(if (or (null lst1) (null lst2))
+		nil
+	(cons (combine-elt-lst (car lst1) lst2) (combine-lst-lst (cdr lst1) lst2 ))))
+
+
+;;>> (combine-lst-lst nil nil)
+;;NIL
+;;>> (combine-lst-lst '(a b c) nil)
+;;NIL
+;;>> (combine-lst-lst NIL '(a b c))
+;;NIL
+;;>> (combine-lst-lst '(a b c) '(1 2))
+;;((A 1) (A 2) (B 1) (B 2) (C 1) (C 2))

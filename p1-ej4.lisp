@@ -46,6 +46,7 @@
   (and (atom x) (not (truth-value-p x)) (not (connector-p x))))
 
 ;; EJEMPLOS:
+#|
 (print "positive-literal-p")
 (print (positive-literal-p 'p))
 ;; evalua a T
@@ -57,6 +58,7 @@
 (print (positive-literal-p '(¬ p)))
 (print (positive-literal-p '(¬ (v p q))))
 ;; evaluan a NIL
+|#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.1.2
@@ -74,6 +76,7 @@
   (and (listp x) (unary-connector-p (car x)) (positive-literal-p (cadr x))))
 
 ;; EJEMPLOS:
+#|
 (print "negative-literal-p")
 (print (negative-literal-p '(¬ p)))        ; T
 (print (negative-literal-p NIL))           ; NIL
@@ -87,6 +90,7 @@
 (print (negative-literal-p 'p))            ; NIL
 (print (negative-literal-p '((¬ p))))      ; NIL
 (print (negative-literal-p '(¬ (v p q))))  ; NIL
+|#
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -104,6 +108,7 @@
   (or (positive-literal-p x) (negative-literal-p x)))
 
 ;; EJEMPLOS:
+#|
 (print "literal-p")
 (print (literal-p 'p))             
 (print (literal-p '(¬ p)))      
@@ -111,6 +116,7 @@
 (print (literal-p '(p)))
 (print (literal-p '(¬ (v p q))))
 ;;; evaluan a  NIL
+|#
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -143,6 +149,7 @@
 		 (t NIL)))))))                   ;; No es FBF en formato prefijo 
 ;;
 ;; EJEMPLOS:
+#|
 (print "wff prefix true")
 (print (wff-prefix-p '(v)))
 (print (wff-prefix-p '(^)))
@@ -159,10 +166,11 @@
 (print (wff-prefix-p '(<=>)))
 (print (wff-prefix-p '(^ (V P (=> A ( B ^ (¬ C) ^ D))) (^ (<=> P (¬ Q)) P) E)))
 ;;; evaluan a NIL
+|#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.1.4
-;; Predicado para determinar si una expresion esta en formato prefijo 
+;; Predicado para determinar si una expresion esta en formato infijo 
 ;;
 ;; RECIBE   : expresion x 
 ;; EVALUA A : T si x esta en formato infijo, 
@@ -187,7 +195,7 @@
 	       ((n-ary-connector-p (first x))	;; conjuncion o disyuncion vacias
 		(null (rest x)))
 	       ((n-ary-connector-p (second x))  ;; Si el primer elemento es un conector enario
-		(and (or (null (fourth x)) (equal (second x) (fourth x)))
+		(and (or (null (fourth x)) (equal (second x) (fourth x))) ;; solo pueden ser connectores mismas
 		     (wff-infix-p (first x)) ;; tienen que ser FBF los operandos 
 		     (wff-infix-p (first (rest (rest x))))))
 	       (t NIL))))))                  ;; No es FBF en formato prefijo 
@@ -195,6 +203,7 @@
 ;;
 ;; EJEMPLOS:
 ;;
+#|
 (print "Wff infix true")
 (print (wff-infix-p 'a)) 						; T
 (print (wff-infix-p '(^))) 					; T  ;; por convencion
@@ -227,6 +236,7 @@
 (print (wff-infix-p '( B => (A ^ C v D)))) 		      ; NIL   
 (print (wff-infix-p '( B ^ C v D ))) 			      ; NIL 
 (print (wff-infix-p '((p v (a => e (b ^ (¬ c) ^ d))) ^ ((p <=> (¬ q)) ^ p ) ^ e))); NIL 
+|#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Convierte FBF en formato prefijo a FBF en formato infijo
@@ -274,7 +284,6 @@
 (prefix-to-infix '(^ (^ (<=> p (¬ q)) p ) e))     ; (((P <=> (¬ Q)) ^ P) ^ E)  
 (prefix-to-infix '( v (¬ p) q (¬ r) (¬ s)))       ; ((¬ P) V Q V (¬ R) V (¬ S))
 
-#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.1.5
 ;;
@@ -283,58 +292,85 @@
 ;; RECIBE   : FBF en formato infijo 
 ;; EVALUA A : FBF en formato prefijo 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun remove-connector (connector -list)
+	(remove-if #'(lambda (elem) (equal connector elem)) -list))
+
+(print (remove-connector 'v '(a v p)))
+(print (remove-connector 'v '(a v p v b)))
+
 (defun infix-to-prefix (wff)
   ;;
   ;; 4.1.5 Completa el codigo
   ;;
-  )
+  (when (wff-infix-p wff)
+    (if (literal-p wff)
+      wff
+      (cond
+	((unary-connector-p (first wff)) 
+	 (list (first wff) (infix-to-prefix (second wff))))
+	((binary-connector-p (second wff)) 
+	 (list (second wff)
+	       (infix-to-prefix (first wff))
+	       (infix-to-prefix (third wff))))
+	((n-ary-connector-p (first wff)) 
+	 (when (null (rest wff)		;;; conjuncion o disyuncion vacias. 
+	    wff)))
+	((n-ary-connector-p (second wff))
+	 (list (second wff)
+	       (first wff)
+	       (let ((tail (remove-connector (second wff) (rest (rest wff)))))
+		 (mapcan #'(lambda (elem) (infix-to-prefix elem)) tail))))
+	(t NIL))))) ;; no deberia llegar a este paso nunca
 
 ;;
 ;; EJEMPLOS
 ;;
-(infix-to-prefix nil)      ;; NIL
-(infix-to-prefix 'a)       ;; a
-(infix-to-prefix '((a)))   ;; NIL
-(infix-to-prefix '(a))     ;; NIL
-(infix-to-prefix '(((a)))) ;; NIL
-(prefix-to-infix (infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^ ((p <=> (¬ q)) ^ p) ^ e)) ) 
+(print (infix-to-prefix nil))      ;; NIL
+(print (infix-to-prefix 'a))       ;; a
+(print (infix-to-prefix '((a))))   ;; NIL
+(print (infix-to-prefix '(a)))     ;; NIL
+(print (infix-to-prefix '(((a))))) ;; NIL
+(print (infix-to-prefix '(a v p)))
+(print (infix-to-prefix '(a v p v b)))
+(print (prefix-to-infix (infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^ ((p <=> (¬ q)) ^ p) ^ e)) )) 
 ;;-> ((P V (A => (B ^ (¬ C) ^ D))) ^ ((P <=> (¬ Q)) ^ P) ^ E)
 
 
-(infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^  ((p <=> (¬ q)) ^ p) ^ e))  
+(print (infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^  ((p <=> (¬ q)) ^ p) ^ e)))
 ;; (^ (V P (=> A (^ B (¬ C) D))) (^ (<=> P (¬ Q)) P) E)
 
-(infix-to-prefix '(¬ ((¬ p) v q v (¬ r) v (¬ s))))
+(print (infix-to-prefix '(¬ ((¬ p) v q v (¬ r) v (¬ s)))))
 ;; (¬ (V (¬ P) Q (¬ R) (¬ S)))
 
 
-(infix-to-prefix
+(print (infix-to-prefix
   (prefix-to-infix
-    '(V (¬ P) Q (¬ R) (¬ S))))
+    '(V (¬ P) Q (¬ R) (¬ S)))))
 ;;-> (V (¬ P) Q (¬ R) (¬ S))
 
-(infix-to-prefix
+(print (infix-to-prefix
   (prefix-to-infix
-    '(¬ (V (¬ P) Q (¬ R) (¬ S)))))
+    '(¬ (V (¬ P) Q (¬ R) (¬ S))))))
 ;;-> (¬ (V (¬ P) Q (¬ R) (¬ S)))
 
 
-(infix-to-prefix 'a)  ; A
-(infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^  ((p <=> (¬ q)) ^ p) ^ e))  
+(print (infix-to-prefix 'a))  ; A
+(print (infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^  ((p <=> (¬ q)) ^ p) ^ e)))  
 ;; (^ (V P (=> A (^ B (¬ C) D))) (^ (<=> P (¬ Q)) P) E)
 
-(infix-to-prefix '(¬ ((¬ p) v q v (¬ r) v (¬ s))))
+(print (infix-to-prefix '(¬ ((¬ p) v q v (¬ r) v (¬ s)))))
 ;; (¬ (V (¬ P) Q (¬ R) (¬ S)))
 
-(infix-to-prefix  (prefix-to-infix '(^ (v p (=> a (^ b (¬ c) d)))))) ; '(v p (=> a (^ b (¬ c) d))))
-(infix-to-prefix  (prefix-to-infix '(^ (^ (<=> p (¬ q)) p ) e))) ; '(^ (^ (<=> p (¬ q)) p ) e))  
-(infix-to-prefix (prefix-to-infix '( v (¬ p) q (¬ r) (¬ s))))  ; '( v (¬ p) q (¬ r) (¬ s)))
+(print (infix-to-prefix  (prefix-to-infix '(^ (v p (=> a (^ b (¬ c) d))))))) ; '(v p (=> a (^ b (¬ c) d))))
+(print (infix-to-prefix  (prefix-to-infix '(^ (^ (<=> p (¬ q)) p ) e)))) ; '(^ (^ (<=> p (¬ q)) p ) e))  
+(print (infix-to-prefix (prefix-to-infix '( v (¬ p) q (¬ r) (¬ s)))))  ; '( v (¬ p) q (¬ r) (¬ s)))
 ;;;
 
-(infix-to-prefix '(p v (a => (b ^ (¬ c) ^ d)))) ; (V P (=> A (^ B (¬ C) D)))
-(infix-to-prefix '(((P <=> (¬ Q)) ^ P) ^ E))  ; (^ (^ (<=> P (¬ Q)) P) E)
-(infix-to-prefix '((¬ P) V Q V (¬ R) V (¬ S))); (V (¬ P) Q (¬ R) (¬ S))
+(print (infix-to-prefix '(p v (a => (b ^ (¬ c) ^ d))))) ; (V P (=> A (^ B (¬ C) D)))
+(print (infix-to-prefix '(((P <=> (¬ Q)) ^ P) ^ E)))  ; (^ (^ (<=> P (¬ Q)) P) E)
+(print (infix-to-prefix '((¬ P) V Q V (¬ R) V (¬ S)))); (V (¬ P) Q (¬ R) (¬ S))
 
+#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.1.6
 ;; Predicado para determinar si una FBF es una clausula  

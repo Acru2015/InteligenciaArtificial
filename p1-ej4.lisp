@@ -293,7 +293,7 @@
 ;; EVALUA A : FBF en formato prefijo 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun remove-connector (connector -list)
-	(remove-if #'(lambda (elem) (equal connector elem)) -list))
+  (remove-if #'(lambda (elem) (equal connector elem)) -list))
 
 (print (remove-connector 'v '(a v p)))
 (print (remove-connector 'v '(a v p v b)))
@@ -314,12 +314,11 @@
 	       (infix-to-prefix (third wff))))
 	((n-ary-connector-p (first wff)) 
 	 (when (null (rest wff)		;;; conjuncion o disyuncion vacias. 
-	    wff)))
+		     wff)))
 	((n-ary-connector-p (second wff))
-	 (list (second wff)
-	       (first wff)
-	       (let ((tail (remove-connector (second wff) (rest (rest wff)))))
-		 (mapcan #'(lambda (elem) (infix-to-prefix elem)) tail))))
+	 (cons (second wff)
+	       (let ((sub-wffs (cons (first wff) (remove-connector (second wff) (rest (rest wff))))))
+		 (mapcar #'(lambda (elem) (infix-to-prefix elem)) sub-wffs))))
 	(t NIL))))) ;; no deberia llegar a este paso nunca
 
 ;;
@@ -332,8 +331,12 @@
 (print (infix-to-prefix '(((a))))) ;; NIL
 (print (infix-to-prefix '(a v p)))
 (print (infix-to-prefix '(a v p v b)))
-(print (prefix-to-infix (infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^ ((p <=> (¬ q)) ^ p) ^ e)) )) 
-;;-> ((P V (A => (B ^ (¬ C) ^ D))) ^ ((P <=> (¬ Q)) ^ P) ^ E)
+(print (infix-to-prefix '(a v p v b v x)))
+(print (infix-to-prefix '(a v p v b v x v y)))
+(print (equal 
+	 (prefix-to-infix (infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^ ((p <=> (¬ q)) ^ p) ^ e)) ) 
+	 ;;-> ((P V (A => (B ^ (¬ C) ^ D))) ^ ((P <=> (¬ Q)) ^ P) ^ E)
+	 '((P V (A => (B ^ (¬ C) ^ D))) ^ ((P <=> (¬ Q)) ^ P) ^ E)))
 
 
 (print (infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^  ((p <=> (¬ q)) ^ p) ^ e)))
@@ -344,13 +347,13 @@
 
 
 (print (infix-to-prefix
-  (prefix-to-infix
-    '(V (¬ P) Q (¬ R) (¬ S)))))
+	 (prefix-to-infix
+	   '(V (¬ P) Q (¬ R) (¬ S)))))
 ;;-> (V (¬ P) Q (¬ R) (¬ S))
 
 (print (infix-to-prefix
-  (prefix-to-infix
-    '(¬ (V (¬ P) Q (¬ R) (¬ S))))))
+	 (prefix-to-infix
+	   '(¬ (V (¬ P) Q (¬ R) (¬ S))))))
 ;;-> (¬ (V (¬ P) Q (¬ R) (¬ S)))
 
 

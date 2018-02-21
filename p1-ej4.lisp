@@ -335,43 +335,42 @@
 (print (infix-to-prefix '(a v p v b v x v y)))
 (print (equal 
 	 (prefix-to-infix (infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^ ((p <=> (¬ q)) ^ p) ^ e)) ) 
-	 ;;-> ((P V (A => (B ^ (¬ C) ^ D))) ^ ((P <=> (¬ Q)) ^ P) ^ E)
 	 '((P V (A => (B ^ (¬ C) ^ D))) ^ ((P <=> (¬ Q)) ^ P) ^ E)))
 
 
-(print (infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^  ((p <=> (¬ q)) ^ p) ^ e)))
-;; (^ (V P (=> A (^ B (¬ C) D))) (^ (<=> P (¬ Q)) P) E)
+(print (equal (infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^  ((p <=> (¬ q)) ^ p) ^ e))
+	      '(^ (V P (=> A (^ B (¬ C) D))) (^ (<=> P (¬ Q)) P) E)))
 
-(print (infix-to-prefix '(¬ ((¬ p) v q v (¬ r) v (¬ s)))))
-;; (¬ (V (¬ P) Q (¬ R) (¬ S)))
-
-
-(print (infix-to-prefix
-	 (prefix-to-infix
-	   '(V (¬ P) Q (¬ R) (¬ S)))))
-;;-> (V (¬ P) Q (¬ R) (¬ S))
-
-(print (infix-to-prefix
-	 (prefix-to-infix
-	   '(¬ (V (¬ P) Q (¬ R) (¬ S))))))
-;;-> (¬ (V (¬ P) Q (¬ R) (¬ S)))
+(print (equal (infix-to-prefix '(¬ ((¬ p) v q v (¬ r) v (¬ s))))
+       '(¬ (V (¬ P) Q (¬ R) (¬ S)))))
 
 
-(print (infix-to-prefix 'a))  ; A
-(print (infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^  ((p <=> (¬ q)) ^ p) ^ e)))  
-;; (^ (V P (=> A (^ B (¬ C) D))) (^ (<=> P (¬ Q)) P) E)
+(print (equal (infix-to-prefix
+		(prefix-to-infix
+		  '(V (¬ P) Q (¬ R) (¬ S))))
+       '(V (¬ P) Q (¬ R) (¬ S))))
 
-(print (infix-to-prefix '(¬ ((¬ p) v q v (¬ r) v (¬ s)))))
-;; (¬ (V (¬ P) Q (¬ R) (¬ S)))
+(print (equal (infix-to-prefix
+		(prefix-to-infix
+		  '(¬ (V (¬ P) Q (¬ R) (¬ S)))))
+       '(¬ (V (¬ P) Q (¬ R) (¬ S)))))
 
-(print (infix-to-prefix  (prefix-to-infix '(^ (v p (=> a (^ b (¬ c) d))))))) ; '(v p (=> a (^ b (¬ c) d))))
-(print (infix-to-prefix  (prefix-to-infix '(^ (^ (<=> p (¬ q)) p ) e)))) ; '(^ (^ (<=> p (¬ q)) p ) e))  
-(print (infix-to-prefix (prefix-to-infix '( v (¬ p) q (¬ r) (¬ s)))))  ; '( v (¬ p) q (¬ r) (¬ s)))
+
+(print (equal (infix-to-prefix 'a) 'A))
+(print (equal (infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^  ((p <=> (¬ q)) ^ p) ^ e)) 
+       '(^ (V P (=> A (^ B (¬ C) D))) (^ (<=> P (¬ Q)) P) E)))
+
+(print (equal (infix-to-prefix '(¬ ((¬ p) v q v (¬ r) v (¬ s))))
+       '(¬ (V (¬ P) Q (¬ R) (¬ S)))))
+
+(print (equal (infix-to-prefix  (prefix-to-infix '(^ (v p (=> a (^ b (¬ c) d)))))) '(v p (=> a (^ b (¬ c) d)))))
+(print (equal (infix-to-prefix  (prefix-to-infix '(^ (^ (<=> p (¬ q)) p ) e)))  '(^ (^ (<=> p (¬ q)) p ) e)))
+(print (equal (infix-to-prefix (prefix-to-infix '( v (¬ p) q (¬ r) (¬ s))))  '( v (¬ p) q (¬ r) (¬ s))))
 ;;;
 
-(print (infix-to-prefix '(p v (a => (b ^ (¬ c) ^ d))))) ; (V P (=> A (^ B (¬ C) D)))
-(print (infix-to-prefix '(((P <=> (¬ Q)) ^ P) ^ E)))  ; (^ (^ (<=> P (¬ Q)) P) E)
-(print (infix-to-prefix '((¬ P) V Q V (¬ R) V (¬ S)))); (V (¬ P) Q (¬ R) (¬ S))
+(print (equal (infix-to-prefix '(p v (a => (b ^ (¬ c) ^ d)))) '(V P (=> A (^ B (¬ C) D)))))
+(print (equal (infix-to-prefix '(((P <=> (¬ Q)) ^ P) ^ E))  '(^ (^ (<=> P (¬ Q)) P) E)))
+(print (equal (infix-to-prefix '((¬ P) V Q V (¬ R) V (¬ S))) '(V (¬ P) Q (¬ R) (¬ S))))
 
 #|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

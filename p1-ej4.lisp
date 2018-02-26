@@ -295,8 +295,10 @@
 (defun remove-connector (connector -list)
   (remove-if #'(lambda (elem) (equal connector elem)) -list))
 
+#|
 (print (remove-connector 'v '(a v p)))
 (print (remove-connector 'v '(a v p v b)))
+|#
 
 (defun infix-to-prefix (wff)
   ;;
@@ -324,6 +326,7 @@
 ;;
 ;; EJEMPLOS
 ;;
+#|
 (print (infix-to-prefix nil))      ;; NIL
 (print (infix-to-prefix 'a))       ;; a
 (print (infix-to-prefix '((a))))   ;; NIL
@@ -342,26 +345,26 @@
 	      '(^ (V P (=> A (^ B (¬ C) D))) (^ (<=> P (¬ Q)) P) E)))
 
 (print (equal (infix-to-prefix '(¬ ((¬ p) v q v (¬ r) v (¬ s))))
-       '(¬ (V (¬ P) Q (¬ R) (¬ S)))))
+	      '(¬ (V (¬ P) Q (¬ R) (¬ S)))))
 
 
 (print (equal (infix-to-prefix
 		(prefix-to-infix
 		  '(V (¬ P) Q (¬ R) (¬ S))))
-       '(V (¬ P) Q (¬ R) (¬ S))))
+	      '(V (¬ P) Q (¬ R) (¬ S))))
 
 (print (equal (infix-to-prefix
 		(prefix-to-infix
 		  '(¬ (V (¬ P) Q (¬ R) (¬ S)))))
-       '(¬ (V (¬ P) Q (¬ R) (¬ S)))))
+	      '(¬ (V (¬ P) Q (¬ R) (¬ S)))))
 
 
 (print (equal (infix-to-prefix 'a) 'A))
 (print (equal (infix-to-prefix '((p v (a => (b ^ (¬ c) ^ d))) ^  ((p <=> (¬ q)) ^ p) ^ e)) 
-       '(^ (V P (=> A (^ B (¬ C) D))) (^ (<=> P (¬ Q)) P) E)))
+	      '(^ (V P (=> A (^ B (¬ C) D))) (^ (<=> P (¬ Q)) P) E)))
 
 (print (equal (infix-to-prefix '(¬ ((¬ p) v q v (¬ r) v (¬ s))))
-       '(¬ (V (¬ P) Q (¬ R) (¬ S)))))
+	      '(¬ (V (¬ P) Q (¬ R) (¬ S)))))
 
 (print (equal (infix-to-prefix  (prefix-to-infix '(^ (v p (=> a (^ b (¬ c) d)))))) '(v p (=> a (^ b (¬ c) d)))))
 (print (equal (infix-to-prefix  (prefix-to-infix '(^ (^ (<=> p (¬ q)) p ) e)))  '(^ (^ (<=> p (¬ q)) p ) e)))
@@ -371,8 +374,7 @@
 (print (equal (infix-to-prefix '(p v (a => (b ^ (¬ c) ^ d)))) '(V P (=> A (^ B (¬ C) D)))))
 (print (equal (infix-to-prefix '(((P <=> (¬ Q)) ^ P) ^ E))  '(^ (^ (<=> P (¬ Q)) P) E)))
 (print (equal (infix-to-prefix '((¬ P) V Q V (¬ R) V (¬ S))) '(V (¬ P) Q (¬ R) (¬ S))))
-
-#|
+|#
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.1.6
 ;; Predicado para determinar si una FBF es una clausula  
@@ -384,24 +386,29 @@
   ;;
   ;; 4.1.6 Completa el codigo
   ;;
-  )
+  (and (listp wff)
+       (eql (first wff) +or+)
+       (reduce #'(lambda (prev elem) (and (literal-p elem) prev)) (rest wff) :initial-value t)))
 
 ;;
 ;; EJEMPLOS:
 ;;
-(clause-p '(v))             ; T
-(clause-p '(v p))           ; T
-(clause-p '(v (¬ r)))       ; T
-(clause-p '(v p q (¬ r) s)) ; T
-(clause-p NIL)                    ; NIL
-(clause-p 'p)                     ; NIL
-(clause-p '(¬ p))                 ; NIL
-(clause-p NIL)                    ; NIL
-(clause-p '(p))                   ; NIL
-(clause-p '((¬ p)))               ; NIL
-(clause-p '(^ a b q (¬ r) s))     ; NIL
-(clause-p '(v (^ a b) q (¬ r) s)) ; NIL
-(clause-p '(¬ (v p q)))           ; NIL
+#|
+(print "Clause p")
+(print (clause-p '(v)))             ; T
+(print (clause-p '(v p)))           ; T
+(print (clause-p '(v (¬ r))))       ; T
+(print (clause-p '(v p q (¬ r) s))) ; T
+(print (clause-p NIL))                    ; NIL
+(print (clause-p 'p))                     ; NIL
+(print (clause-p '(¬ p)))                 ; NIL
+(print (clause-p NIL))                    ; NIL
+(print (clause-p '(p)))                   ; NIL
+(print (clause-p '((¬ p))))               ; NIL
+(print (clause-p '(^ a b q (¬ r) s)))     ; NIL
+(print (clause-p '(v (^ a b) q (¬ r) s))) ; NIL
+(print (clause-p '(¬ (v p q))))           ; NIL
+|#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 1.7
@@ -415,33 +422,36 @@
   ;;
   ;; 4.1.7 Completa el codigo
   ;;
-  )
+  (and (listp wff)
+       (eql (first wff) +and+)
+       (reduce #'(lambda (prev elem) (and (clause-p elem) prev)) (rest wff) :initial-value t)))
 
 ;;
 ;; EJEMPLOS:
 ;;
-(cnf-p '(^ (v a  b c) (v q r) (v (¬ r) s) (v a b))) ; T
-(cnf-p '(^ (v a  b (¬ c)) ))                        ; T
-(cnf-p '(^ ))                                       ; T
-(cnf-p '(^(v )))                                    ; T
-(cnf-p '(¬ p))                                      ; NIL
-(cnf-p '(^ a b q (¬ r) s))                          ; NIL
-(cnf-p '(^ (v a b) q (v (¬ r) s) a b))              ; NIL
-(cnf-p '(v p q (¬ r) s))                            ; NIL
-(cnf-p '(^ (v a b) q (v (¬ r) s) a b))              ; NIL
-(cnf-p '(^ p))                                      ; NIL
-(cnf-p '(v ))                                       ; NIL
-(cnf-p NIL)                                         ; NIL
-(cnf-p '((¬ p)))                                    ; NIL
-(cnf-p '(p))                                        ; NIL
-(cnf-p '(^ (p)))                                    ; NIL
-(cnf-p '((p)))                                      ; NIL
-(cnf-p '(^ a b q (r) s))                            ; NIL
-(cnf-p '(^ (v a  (v b c)) (v q r) (v (¬ r) s) a b)) ; NIL
-(cnf-p '(^ (v a (^ b c)) (^ q r) (v (¬ r) s) a b))  ; NIL
-(cnf-p '(¬ (v p q)))                                ; NIL
-(cnf-p '(v p q (r) s))                              ; NIL 
-
+#|
+(print (cnf-p '(^ (v a  b c) (v q r) (v (¬ r) s) (v a b)))) ; T
+(print (cnf-p '(^ (v a  b (¬ c)) )))                        ; T
+(print (cnf-p '(^ )))                                       ; T
+(print (cnf-p '(^(v ))))                                    ; T
+(print (cnf-p '(¬ p)))                                      ; NIL
+(print (cnf-p '(^ a b q (¬ r) s)))                          ; NIL
+(print (cnf-p '(^ (v a b) q (v (¬ r) s) a b)))              ; NIL
+(print (cnf-p '(v p q (¬ r) s)))                            ; NIL
+(print (cnf-p '(^ (v a b) q (v (¬ r) s) a b)))              ; NIL
+(print (cnf-p '(^ p)))                                      ; NIL
+(print (cnf-p '(v )))                                       ; NIL
+(print (cnf-p NIL))                                         ; NIL
+(print (cnf-p '((¬ p))))                                    ; NIL
+(print (cnf-p '(p)))                                        ; NIL
+(print (cnf-p '(^ (p))))                                    ; NIL
+(print (cnf-p '((p))))                                      ; NIL
+(print (cnf-p '(^ a b q (r) s)))                            ; NIL
+(print (cnf-p '(^ (v a  (v b c)) (v q r) (v (¬ r) s) a b))) ; NIL
+(print (cnf-p '(^ (v a (^ b c)) (^ q r) (v (¬ r) s) a b)))  ; NIL
+(print (cnf-p '(¬ (v p q))))                                ; NIL
+(print (cnf-p '(v p q (r) s)))                              ; NIL 
+|#
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.2.1: Incluya comentarios en el codigo adjunto
 ;;
@@ -457,23 +467,25 @@
   (if (or (null wff) (literal-p wff))
     wff
     (let ((connector (first wff)))
-      (if (eq connector +bicond+)
-	(let ((wff1 (eliminate-biconditional (second wff)))
-	      (wff2 (eliminate-biconditional (third  wff))))
-	  (list +and+ 
+      (if (eq connector +bicond+)			;; cuando estas un bicond
+	(let ((wff1 (eliminate-biconditional (second wff))) ;; eliminacion en fnc 1
+	      (wff2 (eliminate-biconditional (third  wff)))) ;; eliminacion en fnc 2
+	  (list +and+ 						;; transformacion
 		(list +cond+ wff1 wff2)
 		(list +cond+ wff2 wff1)))
-	(cons connector 
-	      (mapcar #'eliminate-biconditional (rest wff)))))))
+	(cons connector 				;; cuando no estas
+	      (mapcar #'eliminate-biconditional (rest wff))))))) ;; eleminacion en el resto
 
 ;;
 ;; EJEMPLOS:
 ;;
-(eliminate-biconditional '(<=> p  (v q s p) ))
+#|
+(print (eliminate-biconditional '(<=> p  (v q s p) )))
 ;;   (^ (=> P (v Q S P)) (=> (v Q S P) P))
-(eliminate-biconditional '(<=>  (<=> p  q) (^ s (¬ q))))
+(print (eliminate-biconditional '(<=>  (<=> p  q) (^ s (¬ q)))))
 ;;   (^ (=> (^ (=> P Q) (=> Q P)) (^ S (¬ Q)))
 ;;      (=> (^ S (¬ Q)) (^ (=> P Q) (=> Q P))))
+|#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.2.2
@@ -487,15 +499,26 @@
 (defun eliminate-conditional (wff)  
   ;;
   ;; 4.2.2 Completa el codigo
-  ;;
-  )       
+  (if (or (null wff) (literal-p wff))
+    wff
+    (let ((connector (first wff)))
+      (if (eq connector +cond+)			
+	(let ((wff1 (eliminate-conditional (second wff)))
+	      (wff2 (eliminate-conditional (third  wff)))) 
+	  (list +or+ 				
+		(list +not+ wff1)
+		wff2))
+	(cons connector 		
+	      (mapcar #'eliminate-conditional (rest wff)))))))
 
 ;;
 ;; EJEMPLOS:
 ;;
-(eliminate-conditional '(=> p q))                      ;;; (V (¬ P) Q)
-(eliminate-conditional '(=> p (v q s p)))              ;;; (V (¬ P) (V Q S P))
-(eliminate-conditional '(=> (=> (¬ p) q) (^ s (¬ q)))) ;;; (V (¬ (V (¬ (¬ P)) Q)) (^ S (¬ Q)))
+#|
+(print (equal (eliminate-conditional '(=> p q)) '(V (¬ P) Q)))
+(print (equal (eliminate-conditional '(=> p (v q s p))) '(V (¬ P) (V Q S P))))
+(print (equal (eliminate-conditional '(=> (=> (¬ p) q) (^ s (¬ q)))) '(V (¬ (V (¬ (¬ P)) Q)) (^ S (¬ Q)))))
+|#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.2.3
@@ -512,7 +535,17 @@
   ;;
   ;; 4.2.3 Completa el codigo
   ;;
-  )
+  (if (or (null wff) (literal-p wff))
+    wff
+    (if (equal (first wff) +not+)
+      (let ((connector (first (first (rest wff))))
+	    (tail (rest (first (rest wff)))))
+	(if (n-ary-connector-p connector)
+	  (cons
+	    (exchange-and-or connector)
+	    (mapcar #'(lambda (elem) (reduce-scope-of-negation (list +not+ elem))) tail))
+	  (mapcan #'(lambda (elem) (reduce-scope-of-negation elem)) tail)))
+      (cons (first wff) (mapcar #'(lambda (elem) (reduce-scope-of-negation elem)) (rest wff))))))
 
 (defun exchange-and-or (connector)
   (cond
@@ -523,11 +556,29 @@
 ;;
 ;;  EJEMPLOS:
 ;;
-(reduce-scope-of-negation '(¬ (v p (¬ q) r))) 
-;;; (^ (¬ P) Q (¬ R))
-(reduce-scope-of-negation '(¬ (^ p (¬ q) (v  r s (¬ a))))) 
-;;;  (V (¬ P) Q (^ (¬ R) (¬ S) A))
+(print "Reduce scope of negation")
+(print (reduce-scope-of-negation 'r))
+(print (reduce-scope-of-negation '(¬ r)))
+(print (reduce-scope-of-negation '(v p)))
+(print (reduce-scope-of-negation '(v p r)))
+(print (reduce-scope-of-negation '(¬ (v p))))
+(print (reduce-scope-of-negation '(¬ (v p r))))
+(print (reduce-scope-of-negation '(¬ (v p (¬ q) r))))
+(print (equal (reduce-scope-of-negation '(¬ (v p (¬ q) r))) 
+	      '(^ (¬ P) Q (¬ R))))
+(print (equal (reduce-scope-of-negation '(¬ (^ p (¬ q) (v  r s (¬ a))))) 
+	      '(V (¬ P) Q (^ (¬ R) (¬ S) A))))
+(print (equal (reduce-scope-of-negation '(¬ (v fbf1 fbf2 fbf3))) '(^ (¬ fbf1) (¬ fbf2) (¬ fbf3))))
+(print (reduce-scope-of-negation '(¬ (v fbf1 fbf2 fbf3))))
+(print (equal (reduce-scope-of-negation '(¬ (^ fbf1 fbf2 fbf3))) '(v (¬ fbf1) (¬ fbf2) (¬ fbf3))))
+(print (reduce-scope-of-negation '(¬ (^ fbf1 fbf2 fbf3))))
+(print (reduce-scope-of-negation '(v fbf1 fbf3)))
+(print (reduce-scope-of-negation '(¬ (v fbf1 fbf3))))
+(print (reduce-scope-of-negation '(^ (¬ (v fbf1 fbf3)) fbf2 fbf3)))
+(print (reduce-scope-of-negation '(¬ (^ (¬ (v fbf1 fbf3)) fbf2 fbf3))))
+(print (reduce-scope-of-negation '(¬ (¬ c1))))
 
+#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.2.4: Comente el codigo adjunto 
 ;;

@@ -556,6 +556,7 @@
 ;;
 ;;  EJEMPLOS:
 ;;
+#|
 (print "Reduce scope of negation")
 (print (reduce-scope-of-negation 'r))
 (print (reduce-scope-of-negation '(¬ r)))
@@ -577,8 +578,8 @@
 (print (reduce-scope-of-negation '(^ (¬ (v fbf1 fbf3)) fbf2 fbf3)))
 (print (reduce-scope-of-negation '(¬ (^ (¬ (v fbf1 fbf3)) fbf2 fbf3))))
 (print (reduce-scope-of-negation '(¬ (¬ c1))))
+|#
 
-#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.2.4: Comente el codigo adjunto 
 ;;
@@ -596,17 +597,22 @@
   (if (null lst)
     (list (list elt))
     (mapcar #'(lambda (x) (cons elt x)) lst)))
+#|
+(print "combine elt lst")
+(print "x (3 4)")
+(print (combine-elt-lst 'x '(3 4)))
+|#
 
-(defun exchange-NF (nf)
+(defun exchange-NF (nf)			;;simplemente intercambia connector
   (if (or (null nf) (literal-p nf)) 
     nf
     (let ((connector (first nf)))
-      (cons (exchange-and-or connector)
-	    (mapcar #'(lambda (x)
+      (cons (exchange-and-or connector) ;;empieza con el connector intercambio
+	    (mapcar #'(lambda (x)	;;tira el connector por dentro
 			(cons connector x))
 		    (exchange-NF-aux (rest nf)))))))
 
-(defun exchange-NF-aux (nf)
+(defun exchange-NF-aux (nf) ;;cambiar literal en listos
   (if (null nf) 
     NIL
     (let ((lst (first nf)))
@@ -615,19 +621,36 @@
 		    x 
 		    (exchange-NF-aux (rest nf)))) 
 	      (if (literal-p lst) (list lst) (rest lst))))))
+#|
+(print "exchange nf")
+(print "(v a (^ b c) d)")
+(print (exchange-NF '(v a (^ b c) d)))
 
-(defun simplify (connector lst-wffs )
+(print "exchange nf aux")
+(print "((^ b c) d)")
+(print (exchange-NF-aux '((^ b c) d)))
+(print "((^ b c) d e)")
+(print (exchange-NF-aux '((^ b c) d e)))
+|#
+
+(defun simplify (connector lst-wffs ) ;; hace nada?
   (if (literal-p lst-wffs)
     lst-wffs                    
     (mapcan #'(lambda (x) 
 		(cond 
-		  ((literal-p x) (list x))
+		  ((literal-p x) (list x)) ;;cuando esta un literal, simplemente devuelve x
 		  ((equal connector (first x))
 		   (mapcan 
 		     #'(lambda (y) (simplify connector (list y))) 
 		     (rest x))) 
-		  (t (list x))))               
+		  (t (list x))))               ;;cuando las connectores no estan los mismos, devuelve x
 	    lst-wffs)))
+
+#|
+(print "simplify")
+(print "v (a (^ b c))")
+(print (simplify 'v '(a (^ b c) d)))
+|#
 
 (defun cnf (wff)
   (cond
@@ -637,37 +660,38 @@
     ((let ((connector (first wff))) 
        (cond
 	 ((equal +and+ connector) 
-	  (cons +and+ (simplify +and+ (mapcar #'cnf (rest wff)))))
+	  (cons +and+ (simplify +and+ (mapcar #'cnf (rest wff)))))  ;;FBF maximo esta en FNC
 	 ((equal +or+ connector) 
-	  (cnf (exchange-NF (cons +or+ (simplify +or+ (rest wff)))))))))))
+	  (cnf (exchange-NF (cons +or+ (simplify +or+ (rest wff))))))))))) ;;FBF maximo esta en FND, cambiar forma despues de simplificar
 
+#|
+(print "Ejemplos")
+(print (cnf 'a))
 
-(cnf 'a)
-
-(cnf '(v (¬ a) b c))
+(print (cnf '(v (¬ a) b c)))
 (print (cnf '(^ (v (¬ a) b c) (¬ e) (^ e f (¬ g) h) (v m n) (^ r s q) (v u q) (^ x y))))
 (print (cnf '(v (^ (¬ a) b c) (¬ e) (^ e f (¬ g) h) (v m n) (^ r s q) (v u q) (^ x y))))
 (print (cnf '(^ (v p  (¬ q)) a (v k  r  (^ m  n)))))
 (print (cnf '(v p  q  (^ r  m)  (^ n  a)  s )))
-(exchange-NF '(v p  q  (^ r  m)  (^ n  a)  s ))
-(cnf '(^ (v a b (^ y r s) (v k l)) c (¬ d) (^ e f (v h i) (^ o p))))
-(cnf '(^ (v a b (^ y r s)) c (¬ d) (^ e f (v h i) (^ o p))))
-(cnf '(^ (^ y r s (^ p q (v c d))) (v a b)))
+(print (exchange-NF '(v p  q  (^ r  m)  (^ n  a)  s )))
+(print (cnf '(^ (v a b (^ y r s) (v k l)) c (¬ d) (^ e f (v h i) (^ o p)))))
+(print (cnf '(^ (v a b (^ y r s)) c (¬ d) (^ e f (v h i) (^ o p)))))
+(print (cnf '(^ (^ y r s (^ p q (v c d))) (v a b))))
 (print (cnf '(^ (v (¬ a) b c) (¬ e) r s 
 		(v e f (¬ g) h) k (v m n) d)))
 ;;
-(cnf '(^ (v p (¬ q)) (v k r (^ m  n))))
+(print (cnf '(^ (v p (¬ q)) (v k r (^ m  n)))))
 (print  (cnf '(v (v p q) e f (^ r  m) n (^ a (¬ b) c) (^ d s))))
 (print (cnf '(^ (^ (¬ y) (v r (^ s (¬ x)) (^ (¬ p) m (v c d))) (v (¬ a) (¬ b))) g)))
 ;;
 ;; EJEMPLOS:
 ;;
-(cnf NIL)              ; NIL
-(cnf 'a)               ; (^ (V A))
-(cnf '(¬ a))           ; (^ (V (¬ A)))
-(cnf '(V (¬ P) (¬ P))) ; (^ (V (¬ P) (¬ P)))
-(cnf '(V A))           ; (^ (V A))
-(cnf '(^ (v p (¬ q)) (v k r (^ m  n))))
+(print (cnf NIL))              ; NIL
+(print (cnf 'a))               ; (^ (V A))
+(print (cnf '(¬ a)))           ; (^ (V (¬ A)))
+(print (cnf '(V (¬ P) (¬ P)))) ; (^ (V (¬ P) (¬ P)))
+(print (cnf '(V A)))           ; (^ (V A))
+(print (cnf '(^ (v p (¬ q)) (v k r (^ m  n)))))
 ;;;   (^ (V P (¬ Q)) (V K R M) (V K R N))
 (print  (cnf '(v (v p q) e f (^ r  m) n (^ a (¬ b) c) (^ d s))))
 ;;; (^ (V P Q E F R N A D)      (V P Q E F R N A S)
@@ -684,7 +708,9 @@
 ;;;   (V R S C D) (V R (¬ X) (¬ P)) 
 ;;;   (V R (¬ X) M) (V R (¬ X) C D)
 ;;;   (V (¬ A) (¬ B)) (V G))  
+|#
 
+#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.2.5:
 ;;

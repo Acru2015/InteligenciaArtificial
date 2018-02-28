@@ -767,18 +767,20 @@
   ;;
   ;; 4.2.6 Completa el codigo
   ;;
-  )
+  (eliminate-connectors (cnf (reduce-scope-of-negation (eliminate-conditional (eliminate-biconditional (infix-to-prefix wff)))))))
 
 ;;
 ;; EJEMPLOS:
 ;; 
-(wff-infix-to-cnf 'a)
-(wff-infix-to-cnf '(¬ a))
-(wff-infix-to-cnf  '( (¬ p) v q v (¬ r) v (¬ s)))
-(wff-infix-to-cnf  '((p v (a => (b ^ (¬ c) ^ d))) ^ ((p <=> (¬ q)) ^ p) ^ e))
-;; ((P (¬ A) B) (P (¬ A) (¬ C)) (P (¬ A) D) ((¬ P) (¬ Q)) (Q P) (P) (E))
-
 #|
+(print (wff-infix-to-cnf 'a))
+(print (wff-infix-to-cnf '(¬ a)))
+(print (wff-infix-to-cnf  '( (¬ p) v q v (¬ r) v (¬ s))))
+(print (wff-infix-to-cnf  '((p v (a => (b ^ (¬ c) ^ d))) ^ ((p <=> (¬ q)) ^ p) ^ e)))
+;; ((P (¬ A) B) (P (¬ A) (¬ C)) (P (¬ A) D) ((¬ P) (¬ Q)) (Q P) (P) (E))
+(print (equal (wff-infix-to-cnf  '((p v (a => (b ^ (¬ c) ^ d))) ^ ((p <=> (¬ q)) ^ p) ^ e)) '((P (¬ A) B) (P (¬ A) (¬ C)) (P (¬ A) D) ((¬ P) (¬ Q)) (Q P) (P) (E))))
+|#
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.3.1
 ;; eliminacion de literales repetidos una clausula 
@@ -799,6 +801,7 @@
 (eliminate-repeated-literals '(a b (¬ c) (¬ a) a c (¬ c) c a))
 ;;;   (B (¬ A) (¬ C) C A)
 
+#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.3.2
 ;; eliminacion de clausulas repetidas en una FNC 

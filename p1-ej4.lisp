@@ -710,7 +710,6 @@
 ;;;   (V (¬ A) (¬ B)) (V G))  
 |#
 
-#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.2.5:
 ;;
@@ -726,27 +725,33 @@
   ;;
   ;; 4.2.5 Completa el codigo
   ;;
-  )
+  (if (literal-p cnf)
+    cnf
+    (mapcar 'eliminate-connectors (rest cnf))))
 
-(eliminate-connectors 'nil)
-(eliminate-connectors (cnf '(^ (v p  (¬ q))  (v k  r  (^ m  n)))))
-(eliminate-connectors
-  (cnf '(^ (v (¬ a) b c) (¬ e) (^ e f (¬ g) h) (v m n) (^ r s q) (v u q) (^ x y))))
+#|
+(print (eliminate-connectors 'nil))
+(print (eliminate-connectors (cnf '(^ (v p  (¬ q))  (v k  r  (^ m  n))))))
+(print (eliminate-connectors
+	 (cnf '(^ (v (¬ a) b c) (¬ e) (^ e f (¬ g) h) (v m n) (^ r s q) (v u q) (^ x y)))))
 
-(eliminate-connectors (cnf '(v p  q  (^ r  m)  (^ n  q)  s )))
-(eliminate-connectors (print (cnf '(^ (v p  (¬ q)) (¬ a) (v k  r  (^ m  n))))))
+(print (eliminate-connectors (cnf '(v p  q  (^ r  m)  (^ n  q)  s ))))
+(print (eliminate-connectors (cnf '(^ (v p  (¬ q)) (¬ a) (v k  r  (^ m  n))))))
 
-(eliminate-connectors '(^))
-(eliminate-connectors '(^ (v p (¬ q)) (v) (v k r)))
-(eliminate-connectors '(^ (v a b)))
+(print (eliminate-connectors '(^)))
+(print (eliminate-connectors '(^ (v p (¬ q)) (v) (v k r))))
+(print (eliminate-connectors '(^ (v a b))))
 
 ;;   EJEMPLOS:
 ;;
 
-(eliminate-connectors '(^ (v p (¬ q)) (v k r)))
+(print (eliminate-connectors '(^ (v p (¬ q)) (v k r))))
 ;; ((P (¬ Q)) (K R))
-(eliminate-connectors '(^ (v p (¬ q)) (v q (¬ a)) (v s e f) (v b)))
+(print (equal (eliminate-connectors '(^ (v p (¬ q)) (v k r))) '((P (¬ Q)) (K R))))
+(print (eliminate-connectors '(^ (v p (¬ q)) (v q (¬ a)) (v s e f) (v b))))
+(print (equal (eliminate-connectors '(^ (v p (¬ q)) (v q (¬ a)) (v s e f) (v b))) '((P (¬ Q)) (Q (¬ A)) (S E F) (B))))
 ;; ((P (¬ Q)) (Q (¬ A)) (S E F) (B))
+|#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.2.6
@@ -773,6 +778,7 @@
 (wff-infix-to-cnf  '((p v (a => (b ^ (¬ c) ^ d))) ^ ((p <=> (¬ q)) ^ p) ^ e))
 ;; ((P (¬ A) B) (P (¬ A) (¬ C)) (P (¬ A) D) ((¬ P) (¬ Q)) (Q P) (P) (E))
 
+#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.3.1
 ;; eliminacion de literales repetidos una clausula 

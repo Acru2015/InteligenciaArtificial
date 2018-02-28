@@ -793,13 +793,20 @@
   ;;
   ;; 4.3.1 Completa el codigo
   ;;
-  )
+  (cond 
+    ((null k)
+    nil)
+  ((literal-p k)
+    k)
+  (t (let ((lit (first k)))
+    (cons lit (eliminate-repeated-literals (remove-if #'(lambda (x) (equal lit x)) (rest k))))))))
 
 ;;
 ;; EJEMPLO:
 ;;
-(eliminate-repeated-literals '(a b (¬ c) (¬ a) a c (¬ c) c a))
-;;;   (B (¬ A) (¬ C) C A)
+(print (eliminate-repeated-literals '(a b (¬ c) (¬ a) a c (¬ c) c a)))
+(print (equal (eliminate-repeated-literals '(a b (¬ c) (¬ a) a c (¬ c) c a)) '(B (¬ A) (¬ C) C A)))
+;;;   (B (¬ A) (¬ C) C A) ;;otro orden, pero semantico correcto
 
 #|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

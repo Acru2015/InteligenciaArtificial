@@ -1,0 +1,279 @@
+;; EJERCICIO 5 ;;
+
+;5.3
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;	 bfs (end queue net)
+;;;	 Algoritmo busqueda en anchura con busqueda en grafo
+;;;
+;;;   INPUT:        end:  nodo final
+;;;                 queue: Lista que contiene la lista con el nodo inicial
+;;;                 net: grafo
+;;;
+;;;   OUTPUT: Si termina con exito lista desde el inicial al objectivo, si no nil
+;;;
+(defun bfs (end queue net) ;;Se le pasan 3 argmentos, el final, la cola con el nodo inicial, y el grafo
+  (if (null queue) nil ;Si la cola esta vacia no tendriamos donde empezar por tanto devuelve nil
+    (let ((path (first queue)))  ;coje la primera lista de la cola (path)
+      (let ((node (first path)))  ;coje el nodo inicial de path
+        (if (eql node end) (reverse path) ;Comprueba si es el nodo final, si es devuelve la ruta del nodo inicial a el, por eso el reverse
+          (bfs end (append  ;Si no, llamada recursiva, pasandole el final,
+                            (rest queue)
+                            (new-paths path node net));La union del resto de la cola (puede estar vacia) y la expansion de ese nodo
+               net))))));Y el grafo
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;	 new-paths (path node net)
+;;;	 Explora el nodo
+;;;
+;;;   INPUT:        path: camino
+;;;                 node: nodo a explorar
+;;;                 net: grafo
+;;;
+;;;   OUTPUT: lista de nodos a explorar
+;;;
+(defun new-paths (path node net);le pasa la lista del nodo y de donde viene, el nodo, y el grafo
+  (mapcar #'(lambda(n);(ver primero el ultimo) a los sucesores les aÃ±ade la ruta que es el nodo padre, el padre del padre, etc hasta el inicial
+                   (cons n path))
+          (rest (assoc node net))));Con assoc busca en el grafo al nodo y sus sucesores, y coger los sucesores
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;5.5
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;	 shortest-path (start end net)
+;;;	 Busqueda de camino mas corto
+;;;
+;;;   INPUT:        start: nodo desde que se empieza
+;;;                 end: nodo final
+;;;                 net: grafo
+;;;
+;;;   OUTPUT: el camino o nil si no lo encuentra
+;;;
+(defun shortest-path (start end net)
+  (bfs end (list (list start)) net))
+
+;;5.6
+;;(shortest-path 'a 'f '((a d) (b d f) (c e) (d f) (e b f) (f)))
+;;  0: (SHORTEST-PATH A F ((A D) (B D F) (C E) (D F) (E B F) (F)))
+;;    1: (BFS F ((A)) ((A D) (B D F) (C E) (D F) (E B F) (F)))
+;;      2: (NEW-PATHS (A) A ((A D) (B D F) (C E) (D F) (E B F) (F)))
+;;      2: NEW-PATHS returned ((D A))
+;;      2: (BFS F ((D A)) ((A D) (B D F) (C E) (D F) (E B F) (F)))
+;;        3: (NEW-PATHS (D A) D ((A D) (B D F) (C E) (D F) (E B F) (F)))
+;;        3: NEW-PATHS returned ((F D A))
+;;        3: (BFS F ((F D A)) ((A D) (B D F) (C E) (D F) (E B F) (F)))
+;;        3: BFS returned (A D F)
+;;      2: BFS returned (A D F)
+;;    1: BFS returned (A D F)
+;;  0: SHORTEST-PATH returned (A D F)
+;;(A D F)
+
+
+
+;5.8
+;Recursion infinita
+;(shortest-path 'a 'c '((a b) (b a) (c a b)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;	 bfs-improved (end queue visto net)
+;;;	 Algoritmo busqueda en anchura con busqueda en grafo
+;;;
+;;;   INPUT:        end:  nodo final
+;;;                 queue: Lista que contiene la lista con el nodo inicial
+;;;                 visto: lista donde se guardan los nodos visitados
+;;;                 net: grafo
+;;;
+;;;   OUTPUT: lista sin sublistas encadenadas con todos los atomos de lst
+;;;
+(defun bfs-improved (end queue visto net) ;;Se le pasan 3 argumentos, el final, la cola con el nodo inicial, y el grafo
+  (if (null queue) nil ;Si la cola esta vacia no tendriamos donde empezar por tanto devuelve nil
+    (let ((path (first queue)))  ;coge la primera lista de la cola (path)
+      (let ((node (first path)))  ;coge el nodo inicial de path
+        (if (eql node end) (reverse path) ;Comprueba si es el nodo final, si es devuelve la ruta del nodo inicial a el, por eso el reverse
+          (when (null (member node visto)) (bfs-improved end (append  ;Si no, llamada recursiva, pasandole el final,
+                (rest queue)
+                (new-paths path node net)) (cons node visto);La union del resto de la cola (puede estar vacia) y la expansion de ese nodo
+              net)))))));Y el grafo
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;	 shortest-path-improved (end queue net)
+;;;	 Busqueda de camino mas corto sin repeticiones
+;;;
+;;;   INPUT:        end: nodo final
+;;;                 queue: Lista que contiene la lista con el nodo inicial
+;;;                 net: grafo
+;;;
+;;;   OUTPUT: el camino o nil si no lo encuentra
+;;;
+(defun shortest-path-improved (end queue net)
+  (bfs-improved end queue '() net))
+
+;(shortest-path-improved 'a '((c)) '((a b) (b a) (c a b))) ;(C A)
+
+;5.7
+;(setf grafo '((C A G) (A B C D E) (B A D E F) (D A B G H) (E A B G H) (F B H) (G C D E H) (H D E F G)))
+;(shortest-path 'F 'C grafo)
+
+;;(shortest-path 'F 'C grafo)
+;;  0: (SHORTEST-PATH F C
+;                    ((C A G) (A B C D E) (B A D E F) (D A B G H) (E A B G H)
+;                     (F B H) (G C D E H) (H D E F G)))
+;   1: (BFS C ((F))
+;            ((C A G) (A B C D E) (B A D E F) (D A B G H) (E A B G H) (F B H)
+;             (G C D E H) (H D E F G)))
+;      2: (NEW-PATHS (F) F
+;                    ((C A G) (A B C D E) (B A D E F) (D A B G H) (E A B G H)
+;                     (F B H) (G C D E H) (H D E F G)))
+;      2: NEW-PATHS returned ((B F) (H F))
+;      2: (BFS C ((B F) (H F))
+;               ((C A G) (A B C D E) (B A D E F) (D A B G H) (E A B G H) (F B H)
+;                (G C D E H) (H D E F G)))
+;         3: (NEW-PATHS (B F) B
+;                       ((C A G) (A B C D E) (B A D E F) (D A B G H) (E A B G H)
+;                        (F B H) (G C D E H) (H D E F G)))
+;         3: NEW-PATHS returned ((A B F) (D B F) (E B F) (F B F))
+;         3: (BFS C ((H F) (A B F) (D B F) (E B F) (F B F))
+;                 ((C A G) (A B C D E) (B A D E F) (D A B G H) (E A B G H)
+;                  (F B H) (G C D E H) (H D E F G)))
+;           4: (NEW-PATHS (H F) H
+;                         ((C A G) (A B C D E) (B A D E F) (D A B G H)
+;                          (E A B G H) (F B H) (G C D E H) (H D E F G)))
+;           4: NEW-PATHS returned ((D H F) (E H F) (F H F) (G H F))
+;           4: (BFS C
+;                   ((A B F) (D B F) (E B F) (F B F) (D H F) (E H F) (F H F)
+;                    (G H F))
+;                   ((C A G) (A B C D E) (B A D E F) (D A B G H) (E A B G H)
+;                    (F B H) (G C D E H) (H D E F G)))
+;             5: (NEW-PATHS (A B F) A
+;                           ((C A G) (A B C D E) (B A D E F) (D A B G H)
+;                            (E A B G H) (F B H) (G C D E H) (H D E F G)))
+;             5: NEW-PATHS returned ((B A B F) (C A B F) (D A B F) (E A B F))
+;             5: (BFS C
+;                     ((D B F) (E B F) (F B F) (D H F) (E H F) (F H F) (G H F)
+;                      (B A B F) (C A B F) (D A B F) (E A B F))
+;                     ((C A G) (A B C D E) (B A D E F) (D A B G H) (E A B G H)
+;                      (F B H) (G C D E H) (H D E F G)))
+;               6: (NEW-PATHS (D B F) D
+;                             ((C A G) (A B C D E) (B A D E F) (D A B G H)
+;                              (E A B G H) (F B H) (G C D E H) (H D E F G)))
+;               6: NEW-PATHS returned ((A D B F) (B D B F) (G D B F) (H D B F))
+;               6: (BFS C
+;                       ((E B F) (F B F) (D H F) (E H F) (F H F) (G H F)
+;                        (B A B F) (C A B F) (D A B F) (E A B F) (A D B F)
+;                        (B D B F) (G D B F) (H D B F))
+;                       ((C A G) (A B C D E) (B A D E F) (D A B G H) (E A B G H)
+;                        (F B H) (G C D E H) (H D E F G)))
+;                 7: (NEW-PATHS (E B F) E
+;                               ((C A G) (A B C D E) (B A D E F) (D A B G H)
+;                                (E A B G H) (F B H) (G C D E H) (H D E F G)))
+;                 7: NEW-PATHS returned ((A E B F) (B E B F) (G E B F) (H E B F))
+;                 7: (BFS C
+;                         ((F B F) (D H F) (E H F) (F H F) (G H F) (B A B F)
+;                          (C A B F) (D A B F) (E A B F) (A D B F) (B D B F)
+;                          (G D B F) (H D B F) (A E B F) (B E B F) (G E B F)
+;                          (H E B F))
+;                         ((C A G) (A B C D E) (B A D E F) (D A B G H)
+;                          (E A B G H) (F B H) (G C D E H) (H D E F G)))
+;                   8: (NEW-PATHS (F B F) F
+;                                 ((C A G) (A B C D E) (B A D E F) (D A B G H)
+;                                  (E A B G H) (F B H) (G C D E H) (H D E F G)))
+;                   8: NEW-PATHS returned ((B F B F) (H F B F))
+;                   8: (BFS C
+;                           ((D H F) (E H F) (F H F) (G H F) (B A B F) (C A B F)
+;                            (D A B F) (E A B F) (A D B F) (B D B F) (G D B F)
+;                            (H D B F) (A E B F) (B E B F) (G E B F) (H E B F)
+;                            (B F B F) (H F B F))
+;                           ((C A G) (A B C D E) (B A D E F) (D A B G H)
+;                            (E A B G H) (F B H) (G C D E H) (H D E F G)))
+;                     9: (NEW-PATHS (D H F) D
+;                                   ((C A G) (A B C D E) (B A D E F) (D A B G H)
+;                                    (E A B G H) (F B H) (G C D E H) (H D E F G)))
+;                     9: NEW-PATHS returned
+;                          ((A D H F) (B D H F) (G D H F) (H D H F))
+;                     9: (BFS C
+;                             ((E H F) (F H F) (G H F) (B A B F) (C A B F)
+;                              (D A B F) (E A B F) (A D B F) (B D B F) (G D B F)
+;                              (H D B F) (A E B F) (B E B F) (G E B F) (H E B F)
+;                              (B F B F) (H F B F) (A D H F) (B D H F) (G D H F)
+;                              (H D H F))
+;                             ((C A G) (A B C D E) (B A D E F) (D A B G H)
+;                              (E A B G H) (F B H) (G C D E H) (H D E F G)))
+;                       10: (NEW-PATHS (E H F) E
+;                                      ((C A G) (A B C D E) (B A D E F)
+;                                       (D A B G H) (E A B G H) (F B H)
+;                                       (G C D E H) (H D E F G)))
+;                       10: NEW-PATHS returned
+;                             ((A E H F) (B E H F) (G E H F) (H E H F))
+;                       10: (BFS C
+;                                ((F H F) (G H F) (B A B F) (C A B F) (D A B F)
+;                                 (E A B F) (A D B F) (B D B F) (G D B F)
+;                                 (H D B F) (A E B F) (B E B F) (G E B F)
+;                                 (H E B F) (B F B F) (H F B F) (A D H F)
+;                                 (B D H F) (G D H F) (H D H F) (A E H F)
+;                                 (B E H F) (G E H F) (H E H F))
+;                                ((C A G) (A B C D E) (B A D E F) (D A B G H)
+;                                 (E A B G H) (F B H) (G C D E H) (H D E F G)))
+;                         11: (NEW-PATHS (F H F) F
+;                                        ((C A G) (A B C D E) (B A D E F)
+;                                         (D A B G H) (E A B G H) (F B H)
+;                                         (G C D E H) (H D E F G)))
+;                         11: NEW-PATHS returned ((B F H F) (H F H F))
+;                         11: (BFS C
+;                                  ((G H F) (B A B F) (C A B F) (D A B F)
+;                                   (E A B F) (A D B F) (B D B F) (G D B F)
+;                                   (H D B F) (A E B F) (B E B F) (G E B F)
+;                                   (H E B F) (B F B F) (H F B F) (A D H F)
+;                                   (B D H F) (G D H F) (H D H F) (A E H F)
+;                                   (B E H F) (G E H F) (H E H F) (B F H F)
+;                                   (H F H F))
+;                                  ((C A G) (A B C D E) (B A D E F) (D A B G H)
+;                                   (E A B G H) (F B H) (G C D E H) (H D E F G)))
+;                           12: (NEW-PATHS (G H F) G
+;                                          ((C A G) (A B C D E) (B A D E F)
+;                                           (D A B G H) (E A B G H) (F B H)
+;                                           (G C D E H) (H D E F G)))
+;                           12: NEW-PATHS returned
+;                                 ((C G H F) (D G H F) (E G H F) (H G H F))
+;                           12: (BFS C
+;                                    ((B A B F) (C A B F) (D A B F) (E A B F)
+;                                     (A D B F) (B D B F) (G D B F) (H D B F)
+;                                     (A E B F) (B E B F) (G E B F) (H E B F)
+;                                     (B F B F) (H F B F) (A D H F) (B D H F)
+;                                     (G D H F) (H D H F) (A E H F) (B E H F)
+;                                     (G E H F) (H E H F) (B F H F) (H F H F)
+;                                     (C G H F) (D G H F) (E G H F) (H G H F))
+;                                    ((C A G) (A B C D E) (B A D E F) (D A B G H)
+;                                     (E A B G H) (F B H) (G C D E H)
+;                                     (H D E F G)))
+;                             13: (NEW-PATHS (B A B F) B
+;                                            ((C A G) (A B C D E) (B A D E F)
+;                                             (D A B G H) (E A B G H) (F B H)
+;                                             (G C D E H) (H D E F G)))
+;                             13: NEW-PATHS returned
+;                                   ((A B A B F) (D B A B F) (E B A B F)
+;                                    (F B A B F))
+;                             13: (BFS C
+;                                      ((C A B F) (D A B F) (E A B F) (A D B F)
+;                                       (B D B F) (G D B F) (H D B F) (A E B F)
+;                                       (B E B F) (G E B F) (H E B F) (B F B F)
+;                                       (H F B F) (A D H F) (B D H F) (G D H F)
+;                                       (H D H F) (A E H F) (B E H F) (G E H F)
+;                                       (H E H F) (B F H F) (H F H F) (C G H F)
+;                                       (D G H F) (E G H F) (H G H F) (A B A B F)
+;                                       (D B A B F) (E B A B F) (F B A B F))
+;                                      ((C A G) (A B C D E) (B A D E F)
+;                                       (D A B G H) (E A B G H) (F B H)
+;                                       (G C D E H) (H D E F G)))
+;                             13: BFS returned (F B A C)
+;                           12: BFS returned (F B A C)
+;                         11: BFS returned (F B A C)
+;                       10: BFS returned (F B A C)
+;                     9: BFS returned (F B A C)
+;                   8: BFS returned (F B A C)
+;                 7: BFS returned (F B A C)
+;               6: BFS returned (F B A C)
+;             5: BFS returned (F B A C)
+;           4: BFS returned (F B A C)
+;         3: BFS returned (F B A C)
+;       2: BFS returned (F B A C)
+;     1: BFS returned (F B A C)
+;   0: SHORTEST-PATH returned (F B A C)
+; (F B A C)

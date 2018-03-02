@@ -795,20 +795,21 @@
   ;;
   (cond 
     ((null k)
-    nil)
-  ((literal-p k)
-    k)
-  (t (let ((lit (first k)))
-    (cons lit (eliminate-repeated-literals (remove-if #'(lambda (x) (equal lit x)) (rest k))))))))
+     nil)
+    ((literal-p k)
+     k)
+    (t (let ((lit (first k)))
+	 (cons lit (eliminate-repeated-literals (remove-if #'(lambda (x) (equal lit x)) (rest k))))))))
 
+#|
 ;;
 ;; EJEMPLO:
 ;;
 (print (eliminate-repeated-literals '(a b (¬ c) (¬ a) a c (¬ c) c a)))
 (print (equal (eliminate-repeated-literals '(a b (¬ c) (¬ a) a c (¬ c) c a)) '(B (¬ A) (¬ C) C A)))
 ;;;   (B (¬ A) (¬ C) C A) ;;otro orden, pero semantico correcto
+|#
 
-#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.3.2
 ;; eliminacion de clausulas repetidas en una FNC 
@@ -816,18 +817,76 @@
 ;; RECIBE   : cnf - FBF en FNC (lista de clausulas, conjuncion implicita)
 ;; EVALUA A : FNC equivalente sin clausulas repetidas 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun or-list (bool-list)
+  (reduce (lambda (prev elem) (or prev elem)) bool-list :initial-value t))
+
+(defun and-list (bool-list)
+  (reduce (lambda (prev elem) (and prev elem)) bool-list :initial-value t))
+
+(defun reduced-clause-p (cnf)
+  (reduce #'(lambda (prev elem) (and prev (literal-p elem))) cnf :initial-value t))
+
+(print "reduced clause")
+(print (reduced-clause-p '(a b c)))
+(print (reduced-clause-p '(a (b g) c)))
+
+(defun cnf-equal-p-2 (elem0 elem1)
+  (cond
+    ((and (literal-p elem0) (literal-p elem1))
+     (equal elem0 elem1))
+    ((or (literal-p elem0) (literal-p elem1))
+     nil)
+    (t
+      (or-list (mapcar #'(lambda (subelem) (cnf-equal-p elem0 subelem)) elem1)))))
+
+(defun included-in-p (elem fnc1)
+  (or-list (mapcar #'(lambda (elem1) (cnf-equal-p-2 elem elem1)) fnc1)))
+
+(print "included in p")
+(print (included-in-p 'a '(a b)))
+
+(defun cnf-equal-p (fnc1 fnc2)
+  (and (and-list (mapcar #'(lambda (elem) (included-in-p elem fnc2)) fnc1))
+       (and-list (mapcar #'(lambda (elem) (included-in-p elem fnc1)) fnc2))))
+
+(print "cnf equal")
+(print (cnf-equal-p '(a b) '(a b)))
+(print (cnf-equal-p '(a b) '(a)))
+(print (cnf-equal-p '(a (b c) d) '((b c) a a d)))
+(print (cnf-equal-p '(a b d) '((b c) a a d)))
+
+(defun filter-fncs (cnf cnfs)
+  (remove-if #'(lambda (elem) (cnf-equal-p cnf elem)) cnfs))
+
+(defun remove-equal-fncs (cnf)
+  (if (null cnf)
+    nil 
+    (let ((first-cnf (first cnf)))
+      (cons first-cnf (remove-equal-fncs (filter-fncs first-cnf (rest cnf)))))))
+
 (defun eliminate-repeated-clauses (cnf) 
   ;;
   ;; 4.3.2 Completa el codigo
   ;;
-  )
+  (cond
+    ((literal-p cnf)
+     cnf)
+    ((reduced-clause-p cnf)
+     (eliminate-repeated-literals cnf))
+    (t (mapcar 'eliminate-repeated-clauses (remove-equal-fncs cnf)))))
 
 ;;
 ;; EJEMPLO:
 ;;
-(eliminate-repeated-clauses '(((¬ a) c) (c (¬ a)) ((¬ a) (¬ a) b c b) (a a b) (c (¬ a) b  b) (a b)))
+(print (eliminate-repeated-clauses '(a a b c a)))
+(print (eliminate-repeated-clauses '((a b) (a b))))
+(print (eliminate-repeated-clauses '(((¬ a) c) (c (¬ a)) ((¬ a) (¬ a) b c b) (a a b) (c (¬ a) b  b) (a b))))
 ;;; ((C (¬ A)) (C (¬ A) B) (A B))
+(print (equal (eliminate-repeated-clauses '(((¬ a) c) (c (¬ a)) ((¬ a) (¬ a) b c b) (a a b) (c (¬ a) b  b) (a b))) '((C (¬ A)) (C (¬ A) B) (A B))))
+(print '((C (¬ A)) (C (¬ A) B) (A B)))
 
+#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.3.3
 ;; Predicado que determina si una clausula subsume otra

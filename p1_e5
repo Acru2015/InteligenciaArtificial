@@ -13,11 +13,11 @@
 ;;;
 (defun bfs (end queue net) ;;Se le pasan 3 argmentos, el final, la cola con el nodo inicial, y el grafo
   (if (null queue) nil ;Si la cola esta vacia no tendriamos donde empezar por tanto devuelve nil
-    (let ((path (car queue)))  ;coje la primera lista de la cola (path)
-      (let ((node (car path)))  ;coje el nodo inicial de path
+    (let ((path (first queue)))  ;coje la primera lista de la cola (path)
+      (let ((node (first path)))  ;coje el nodo inicial de path
         (if (eql node end) (reverse path) ;Comprueba si es el nodo final, si es devuelve la ruta del nodo inicial a el, por eso el reverse
           (bfs end (append  ;Si no, llamada recursiva, pasandole el final,
-                            (cdr queue)
+                            (rest queue)
                             (new-paths path node net));La union del resto de la cola (puede estar vacia) y la expansion de ese nodo
                net))))));Y el grafo
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -33,7 +33,7 @@
 (defun new-paths (path node net);le pasa la lista del nodo y de donde viene, el nodo, y el grafo
   (mapcar #'(lambda(n);(ver primero el ultimo) a los sucesores les aÃ±ade la ruta que es el nodo padre, el padre del padre, etc hasta el inicial
                    (cons n path))
-          (cdr (assoc node net))));Con assoc busca en el grafo al nodo y sus sucesores, y coger los sucesores
+          (rest (assoc node net))));Con assoc busca en el grafo al nodo y sus sucesores, y coger los sucesores
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -85,11 +85,11 @@
 ;;;
 (defun bfs-improved (end queue visto net) ;;Se le pasan 3 argumentos, el final, la cola con el nodo inicial, y el grafo
   (if (null queue) nil ;Si la cola esta vacia no tendriamos donde empezar por tanto devuelve nil
-    (let ((path (car queue)))  ;coge la primera lista de la cola (path)
-      (let ((node (car path)))  ;coge el nodo inicial de path
+    (let ((path (first queue)))  ;coge la primera lista de la cola (path)
+      (let ((node (first path)))  ;coge el nodo inicial de path
         (if (eql node end) (reverse path) ;Comprueba si es el nodo final, si es devuelve la ruta del nodo inicial a el, por eso el reverse
           (when (null (member node visto)) (bfs-improved end (append  ;Si no, llamada recursiva, pasandole el final,
-                (cdr queue)
+                (rest queue)
                 (new-paths path node net)) (cons node visto);La union del resto de la cola (puede estar vacia) y la expansion de ese nodo
               net)))))));Y el grafo
 

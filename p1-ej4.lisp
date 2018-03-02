@@ -817,37 +817,6 @@
 ;; RECIBE   : cnf - FBF en FNC (lista de clausulas, conjuncion implicita)
 ;; EVALUA A : FNC equivalente sin clausulas repetidas 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defun or-list (bool-list)
-  (reduce (lambda (prev elem) (or prev elem)) bool-list :initial-value t))
-
-(defun and-list (bool-list)
-  (reduce (lambda (prev elem) (and prev elem)) bool-list :initial-value t))
-
-(defun reduced-clause-p (cnf)
-  (reduce #'(lambda (prev elem) (and prev (literal-p elem))) cnf :initial-value t))
-
-#|
-(print "reduced clause")
-(print (reduced-clause-p '(a b c)))
-(print (reduced-clause-p '(a (b g) c)))
-
-(defun cnf-equal-p-2 (elem0 elem1)
-  (cond
-    ((and (literal-p elem0) (literal-p elem1))
-     (equal elem0 elem1))
-    ((or (literal-p elem0) (literal-p elem1))
-     nil)
-    (t
-      (or-list (mapcar #'(lambda (subelem) (cnf-equal-p elem0 subelem)) elem1)))))
-
-(defun included-in-p (elem fnc1)
-  (or-list (mapcar #'(lambda (elem1) (cnf-equal-p-2 elem elem1)) fnc1)))
-
-(print "included in p")
-(print (included-in-p 'a '(a b)))
-|#
-
 (defun cnf-equal-p (fnc1 fnc2)
   (and (equal (set-difference fnc1 fnc2 :test #'equal) nil)
        (equal (set-difference fnc2 fnc1 :test #'equal) nil)))
@@ -859,15 +828,6 @@
 (print (cnf-equal-p '(a (b c) d) '((b c) a a d)))
 (print (cnf-equal-p '(a b d) '((b c) a a d)))
 |#
-
-(defun filter-fncs (cnf cnfs)
-  (remove-if #'(lambda (elem) (cnf-equal-p cnf elem)) cnfs))
-
-(defun remove-equal-fncs (cnf)
-  (if (null cnf)
-    nil 
-    (let ((first-cnf (first cnf)))
-      (cons first-cnf (remove-equal-fncs (filter-fncs first-cnf (rest cnf)))))))
 
 (defun eliminate-repeated-clauses (cnf) 
   ;;
@@ -883,14 +843,15 @@
 ;;
 ;; EJEMPLO:
 ;;
+#|
 (print (eliminate-repeated-clauses '(a a b c a)))
 (print (eliminate-repeated-clauses '((a b) (a b))))
 (print (eliminate-repeated-clauses '(((¬ a) c) (c (¬ a)) ((¬ a) (¬ a) b c b) (a a b) (c (¬ a) b  b) (a b))))
 ;;; ((C (¬ A)) (C (¬ A) B) (A B))
 (print '((C (¬ A)) (C (¬ A) B) (A B)))
-(print (equal (eliminate-repeated-clauses '(((¬ a) c) (c (¬ a)) ((¬ a) (¬ a) b c b) (a a b) (c (¬ a) b  b) (a b))) '((C (¬ A)) (C (¬ A) B) (A B))))
+(print (equal (eliminate-repeated-clauses '(((¬ a) c) (c (¬ a)) ((¬ a) (¬ a) b c b) (a a b) (c (¬ a) b  b) (a b))) '((C (¬ A)) (C (¬ A) B) (A B)))) ;;semantically equal
+|#
 
-#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.3.3
 ;; Predicado que determina si una clausula subsume otra
@@ -925,6 +886,7 @@
 (subsume '((¬ a) b (¬ c) a) '(a b (¬ c)) )
 ;; nil
 
+#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.3.4
 ;; eliminacion de clausulas subsumidas en una FNC 

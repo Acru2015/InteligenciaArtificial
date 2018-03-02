@@ -827,6 +827,7 @@
 (defun reduced-clause-p (cnf)
   (reduce #'(lambda (prev elem) (and prev (literal-p elem))) cnf :initial-value t))
 
+#|
 (print "reduced clause")
 (print (reduced-clause-p '(a b c)))
 (print (reduced-clause-p '(a (b g) c)))
@@ -845,16 +846,19 @@
 
 (print "included in p")
 (print (included-in-p 'a '(a b)))
+|#
 
 (defun cnf-equal-p (fnc1 fnc2)
-  (and (and-list (mapcar #'(lambda (elem) (included-in-p elem fnc2)) fnc1))
-       (and-list (mapcar #'(lambda (elem) (included-in-p elem fnc1)) fnc2))))
+  (and (equal (set-difference fnc1 fnc2 :test #'equal) nil)
+       (equal (set-difference fnc2 fnc1 :test #'equal) nil)))
 
+#|
 (print "cnf equal")
 (print (cnf-equal-p '(a b) '(a b)))
 (print (cnf-equal-p '(a b) '(a)))
 (print (cnf-equal-p '(a (b c) d) '((b c) a a d)))
 (print (cnf-equal-p '(a b d) '((b c) a a d)))
+|#
 
 (defun filter-fncs (cnf cnfs)
   (remove-if #'(lambda (elem) (cnf-equal-p cnf elem)) cnfs))
@@ -873,8 +877,8 @@
     ((literal-p cnf)
      cnf)
     ((reduced-clause-p cnf)
-     (eliminate-repeated-literals cnf))
-    (t (mapcar 'eliminate-repeated-clauses (remove-equal-fncs cnf)))))
+     cnf)
+    (t (cons (first cnf) (eliminate-repeated-clauses (remove-if #'(lambda (elem) (cnf-equal-p (first cnf) elem)) (rest cnf)))))))
 
 ;;
 ;; EJEMPLO:
@@ -883,8 +887,8 @@
 (print (eliminate-repeated-clauses '((a b) (a b))))
 (print (eliminate-repeated-clauses '(((¬ a) c) (c (¬ a)) ((¬ a) (¬ a) b c b) (a a b) (c (¬ a) b  b) (a b))))
 ;;; ((C (¬ A)) (C (¬ A) B) (A B))
-(print (equal (eliminate-repeated-clauses '(((¬ a) c) (c (¬ a)) ((¬ a) (¬ a) b c b) (a a b) (c (¬ a) b  b) (a b))) '((C (¬ A)) (C (¬ A) B) (A B))))
 (print '((C (¬ A)) (C (¬ A) B) (A B)))
+(print (equal (eliminate-repeated-clauses '(((¬ a) c) (c (¬ a)) ((¬ a) (¬ a) b c b) (a a b) (c (¬ a) b  b) (a b))) '((C (¬ A)) (C (¬ A) B) (A B))))
 
 #|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

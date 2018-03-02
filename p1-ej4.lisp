@@ -817,9 +817,12 @@
 ;; RECIBE   : cnf - FBF en FNC (lista de clausulas, conjuncion implicita)
 ;; EVALUA A : FNC equivalente sin clausulas repetidas 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun get-set-diff (elem1 elem2)
+  (set-difference elem1 elem2 :test #'equal))
+
 (defun cnf-equal-p (fnc1 fnc2)
-  (and (equal (set-difference fnc1 fnc2 :test #'equal) nil)
-       (equal (set-difference fnc2 fnc1 :test #'equal) nil)))
+  (and (equal (get-set-diff fnc1 fnc2) nil)
+       (equal (get-set-diff fnc2 fnc1) nil)))
 
 #|
 (print "cnf equal")
@@ -864,29 +867,38 @@
   ;;
   ;; 4.3.3 Completa el codigo
   ;;
-  )
-
+  (if (equal nil (get-set-diff K1 K2))
+    K1
+    nil))
 ;;
 ;;  EJEMPLOS:
 ;;
-(subsume '(a) '(a b (¬ c)))
-;; ((a))
-(subsume NIL '(a b (¬ c)))
-;; (NIL)
-(subsume '(a b (¬ c)) '(a) )
-;; NIL
-(subsume '( b (¬ c)) '(a b (¬ c)) )
-;; ( b (¬ c))
-(subsume '(a b (¬ c)) '( b (¬ c)))
-;; NIL
-(subsume '(a b (¬ c)) '(d  b (¬ c)))
-;; nil
-(subsume '(a b (¬ c)) '((¬ a) b (¬ c) a))
-;; (A B (¬ C))
-(subsume '((¬ a) b (¬ c) a) '(a b (¬ c)) )
-;; nil
-
 #|
+(print "subsume")
+(print (subsume '(a) '(a b (¬ c))))
+(print (equal (subsume '(a) '(a b (¬ c))) '((a))))
+;; ((a))
+(print (subsume NIL '(a b (¬ c))))
+(print (equal (subsume NIL '(a b (¬ c))) '(NIL)))
+;; (NIL)
+(print (subsume '(a b (¬ c)) '(a) ))
+(print (equal (subsume '(a b (¬ c)) '(a)) NIL))
+;; NIL
+(print (subsume '( b (¬ c)) '(a b (¬ c))))
+(print (equal (subsume '( b (¬ c)) '(a b (¬ c))) '(b (¬ c))))
+;; ( b (¬ c))
+(print (subsume '(a b (¬ c)) '( b (¬ c))))
+(print (equal (subsume '(a b (¬ c)) '( b (¬ c))) NIL))
+;; NIL
+(print (equal (subsume '(a b (¬ c)) '(d  b (¬ c))) nil))
+;; nil
+(print (equal (subsume '(a b (¬ c)) '((¬ a) b (¬ c) a)) '(A B (¬ C))))
+;; (A B (¬ C))
+(print (subsume '((¬ a) b (¬ c) a) '(a b (¬ c)) ))
+(print (equal (subsume '((¬ a) b (¬ c) a) '(a b (¬ c))) nil))
+;; nil
+|#
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.3.4
 ;; eliminacion de clausulas subsumidas en una FNC 
@@ -894,25 +906,42 @@
 ;; RECIBE   : K (clausula), cnf (FBF en FNC)
 ;; EVALUA A : FBF en FNC equivalente a cnf sin clausulas subsumidas 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun subsumed-by-clause (k1 k2)
+  (not (equal nil (subsume k2 k1))))
+
+(defun subsumed-in-cnf-p (k cnf2)
+  (reduce #'(lambda (prev elem) (or (subsumed-by-clause k elem) prev)) cnf2 :initial-value 'nil))
+
 (defun eliminate-subsumed-clauses (cnf) 
   ;;
   ;; 4.3.4 Completa el codigo
   ;;
-  )
+  (if (null cnf)
+    nil
+    (let* ((head (first cnf))
+	  (tail (rest cnf))
+	  (filtered-tail (remove-if #'(lambda (elem) (subsumed-by-clause elem head)) tail)))
+      (if (subsumed-in-cnf-p head filtered-tail)
+	(eliminate-subsumed-clauses filtered-tail)
+	(cons head (eliminate-subsumed-clauses filtered-tail))))))
 
 ;;
 ;;  EJEMPLOS:
 ;;
-(eliminate-subsumed-clauses 
-  '((a b c) (b c) (a (¬ c) b)  ((¬ a) b) (a b (¬ a)) (c b a)))
-;;; ((A (¬ C) B) ((¬ A) B) (B C)) ;; el orden no es importante
-(eliminate-subsumed-clauses
-  '((a b c) (b c) (a (¬ c) b) (b)  ((¬ a) b) (a b (¬ a)) (c b a)))
-;;; ((B))
-(eliminate-subsumed-clauses
-  '((a b c) (b c) (a (¬ c) b) ((¬ a))  ((¬ a) b) (a b (¬ a)) (c b a)))
-;;; ((A (¬ C) B) ((¬ A)) (B C))
+#|
+(print "eliminiate subsumed clauses")
+(print (eliminate-subsumed-clauses 
+	 '((a b c) (b c) (a (¬ c) b)  ((¬ a) b) (a b (¬ a)) (c b a))))
+(print '((A (¬ C) B) ((¬ A) B) (B C))) ;; el orden no es importante
+(print (eliminate-subsumed-clauses
+	 '((a b c) (b c) (a (¬ c) b) (b)  ((¬ a) b) (a b (¬ a)) (c b a))))
+(print '((B)))
+(print (eliminate-subsumed-clauses
+	 '((a b c) (b c) (a (¬ c) b) ((¬ a))  ((¬ a) b) (a b (¬ a)) (c b a))))
+(print '((A (¬ C) B) ((¬ A)) (B C)))
+|#
 
+#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.3.5
 ;; Predicado que determina si una clausula es tautologia

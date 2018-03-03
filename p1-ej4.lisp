@@ -1150,7 +1150,6 @@
 ;; NIL
 |#
 
-#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.4.4
 ;; resolvente de dos clausulas
@@ -1163,37 +1162,60 @@
 ;;                          sobre K1 y K2, con los literales repetidos 
 ;;                          eliminados
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun resolve-on (lambda K1 K2) 
+(defun member-of-p (_lambda clause)
+  (reduce #'(lambda (prev elem) (or (equal elem _lambda) prev)) clause :initial-value 'f))
+
+(defun has-positive-p (_lambda clause)
+  (member-of-p _lambda clause))
+
+(defun has-negative-p (_lambda clause)
+  (member-of-p (list +not+ _lambda) clause))
+
+(defun has-literal-p (_lambda clause)
+  (or (has-negative-p _lambda clause) (has-positive-p _lambda clause)))
+
+(defun literal-of (_lambda elem)
+  (or (equal (list +not+ _lambda) elem) (equal elem _lambda)))
+
+(defun resolve-on (_lambda K1 K2) 
   ;;
   ;; 4.4.4 Completa el codigo
   ;;
-  )
+  (if (and (has-literal-p _lambda k1) (has-literal-p _lambda k2))
+    (if (and (has-negative-p _lambda k1) (has-positive-p _lambda k2))
+      (remove-if #'(lambda (elem) (literal-of _lambda elem)) (union k1 k2)))))
+
 
 ;;
 ;;  EJEMPLOS:
 ;;
-(resolve-on 'p '(a b (¬ c) p) '((¬ p) b a q r s))
+#|
+(print (null (resolve-on 'p '(a p) '(b p))))
+(print (null (resolve-on 'p '(a p) '(b p))))
+(print (resolve-on 'p '(a b (¬ c) p) '((¬ p) b a q r s)))
 ;; (((¬ C) B A Q R S))
 
-(resolve-on 'p '(a b (¬ c) (¬ p)) '( p b a q r s))
+(print (resolve-on 'p '(a b (¬ c) (¬ p)) '( p b a q r s)))
 ;; (((¬ C) B A Q R S))
 
-(resolve-on 'p '(p) '((¬ p)))
+(print (null (resolve-on 'p '(p) '((¬ p)))))
 ;; (NIL)
 
 
-(resolve-on 'p NIL '(p b a q r s))
+(print (null (resolve-on 'p NIL '(p b a q r s))))
 ;; NIL
 
-(resolve-on 'p NIL NIL)
+(print (null (resolve-on 'p NIL NIL)))
 ;; NIL
 
-(resolve-on 'p '(a b (¬ c) (¬ p)) '(p b a q r s))
+(print (resolve-on 'p '(a b (¬ c) (¬ p)) '(p b a q r s)))
 ;; (((¬ C) B A Q R S))
 
-(resolve-on 'p '(a b (¬ c)) '(p b a q r s))
+(print (null (resolve-on 'p '(a b (¬ c)) '(p b a q r s))))
 ;; NIL
+|#
 
+#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.4.5
 ;; Construye el conjunto de clausulas RES para una FNC 

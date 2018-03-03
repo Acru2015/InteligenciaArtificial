@@ -825,7 +825,7 @@
        (equal (get-set-diff fnc2 fnc1) nil)))
 
 (defun reduced-clause-p (cnf)
-    (reduce #'(lambda (prev elem) (and prev (literal-p elem))) cnf :initial-value t))
+  (reduce #'(lambda (prev elem) (and prev (literal-p elem))) cnf :initial-value t))
 #|
 (print "cnf equal")
 (print (cnf-equal-p '(a b) '(a b)))
@@ -956,13 +956,13 @@
   ;; 4.3.5 Completa el codigo
   ;;
   (if (null k)
-     nil
+    nil
     (let ((literal (first K)))
       (if (negative-literal-p literal)
-       (let ((letter (second literal)))
-	 (if (not (null (member letter (rest k) :test #'equal)))
-	   t
-	   (tautology-p (rest k)))))
+	(let ((letter (second literal)))
+	  (if (not (null (member letter (rest k) :test #'equal)))
+	    t
+	    (tautology-p (rest k)))))
       (if (not (null (member (list +not+ literal) (rest k) :test #'equal)))
 	t
 	(tautology-p (rest k))))))
@@ -994,7 +994,7 @@
 ;;
 #|
 (print (eliminate-tautologies 
-  '(((¬ b) a) (a (¬ a) b c) ( a (¬ b)) (s d (¬ s) (¬ s)) (a))))
+	 '(((¬ b) a) (a (¬ a) b c) ( a (¬ b)) (s d (¬ s) (¬ s)) (a))))
 ;; (((¬ B) A) (A (¬ B)) (A))
 
 (print (eliminate-tautologies '((a (¬ a) b c))))
@@ -1023,11 +1023,12 @@
 ;;
 ;;  EJEMPLOS:
 ;;
+#|
 (print (simplify-cnf '((a a) (b) (a) ((¬ b)) ((¬ b)) (a b c a)  (s s d) (b b c a b))))
 (print '((B) ((¬ B)) (S D) (A))) ;; en cualquier orden
+|#
 
 
-#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.4.1
 ;; Construye el conjunto de clausulas lambda-neutras para una FNC 
@@ -1037,33 +1038,40 @@
 ;; EVALUA A : cnf_lambda^(0) subconjunto de clausulas de cnf  
 ;;            que no contienen el literal lambda ni ¬lambda   
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun extract-neutral-clauses (lambda cnf) 
+(defun neutral-clause-p (_lambda clause)
+  (and (null (member _lambda clause :test #'equal))
+      (null (member (list +not+ _lambda) clause :test #'equal))))
+
+(defun extract-neutral-clauses (_lambda cnf) 
   ;;
   ;; 4.4.1 Completa el codigo
   ;;
-  )
+  (remove-if-not #'(lambda (clause) (neutral-clause-p _lambda clause)) cnf))
+
 
 ;;
 ;;  EJEMPLOS:
 ;;
-(extract-neutral-clauses 'p
-			 '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
+#|
+(print (extract-neutral-clauses 'p
+				'((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s))))
 ;; ((R (¬ S) Q) ((¬ R) S))
 
 
-(extract-neutral-clauses 'r NIL)
+(print (null (extract-neutral-clauses 'r NIL)))
 ;; NIL
 
-(extract-neutral-clauses 'r '(NIL))
+(print (equal (extract-neutral-clauses 'r '(NIL)) '(NIL)))
 ;; (NIL)
 
-(extract-neutral-clauses 'r
-			 '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
-;; ((P Q) (A B P) (A (¬ P) C))
+(print (equal (extract-neutral-clauses 'r
+				       '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s))) 
+	      '((P Q) (A B P) (A (¬ P) C))))
 
-(extract-neutral-clauses 'p
-			 '((p (¬ q) r) (p q) (r (¬ s) p q) (a b p) (a (¬ p) c) ((¬ r) p s)))
+(print (null (extract-neutral-clauses 'p
+				      '((p (¬ q) r) (p q) (r (¬ s) p q) (a b p) (a (¬ p) c) ((¬ r) p s)))))
 ;; NIL
+|#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.4.2
@@ -1074,31 +1082,35 @@
 ;; EVALUA A : cnf_lambda^(+) subconjunto de clausulas de cnf 
 ;;            que contienen el literal lambda  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun extract-positive-clauses (lambda cnf) 
+(defun clause-has-positive-literal-p (_lambda clause)
+  (not (null (member _lambda clause :test #'equal))))
+
+(defun extract-positive-clauses (_lambda cnf) 
   ;;
   ;; 4.4.2 Completa el codigo
   ;;
-  )
+  (remove-if-not #'(lambda (clause) (clause-has-positive-literal-p _lambda clause)) cnf))
 
 ;;
 ;;  EJEMPLOS:
 ;;
-(extract-positive-clauses 'p
+#|
+(print (equal (extract-positive-clauses 'p
 			  '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
+	      '((P (¬ Q) R) (P Q) (A B P))))
 
-;; ((P (¬ Q) R) (P Q) (A B P))
 
-
-(extract-positive-clauses 'r NIL)
+(print (null (extract-positive-clauses 'r NIL)))
 ;; NIL
-(extract-positive-clauses 'r '(NIL))
+(print (null (extract-positive-clauses 'r '(NIL))))
 ;; NIL
-(extract-positive-clauses 'r
+(print (equal (extract-positive-clauses 'r
 			  '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
-;; ((P (¬ Q) R) (R (¬ S) Q))
-(extract-positive-clauses 'p
-			  '(((¬ p) (¬ q) r) ((¬ p) q) (r (¬ s) (¬ p) q) (a b (¬ p)) ((¬ r) (¬ p) s)))
+	      '((P (¬ Q) R) (R (¬ S) Q))))
+(print (null (extract-positive-clauses 'p
+			  '(((¬ p) (¬ q) r) ((¬ p) q) (r (¬ s) (¬ p) q) (a b (¬ p)) ((¬ r) (¬ p) s)))))
 ;; NIL
+|#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.4.3
@@ -1109,30 +1121,36 @@
 ;; EVALUA A : cnf_lambda^(-) subconjunto de clausulas de cnf  
 ;;            que contienen el literal ¬lambda  
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun extract-negative-clauses (lambda cnf) 
+(defun clause-has-negative-literal-p (_lambda clause)
+  (not (null (member (list +not+ _lambda) clause :test #'equal))))
+
+(defun extract-negative-clauses (_lambda cnf) 
   ;;
   ;; 4.4.3 Completa el codigo
   ;;
-  )
+  (remove-if-not #'(lambda (clause) (clause-has-negative-literal-p _lambda clause)) cnf))
 
 ;;
 ;;  EJEMPLOS:
 ;;
-(extract-negative-clauses 'p
+#|
+(print (equal (extract-negative-clauses 'p
 			  '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
-;; ((A (¬ P) C))
+	      '((A (¬ P) C))))
 
-(extract-negative-clauses 'r NIL)
+(print (null (extract-negative-clauses 'r NIL)))
 ;; NIL
-(extract-negative-clauses 'r '(NIL))
+(print (null (extract-negative-clauses 'r '(NIL))))
 ;; NIL
-(extract-negative-clauses 'r
+(print (equal (extract-negative-clauses 'r
 			  '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
-;; (((¬ R) S))
-(extract-negative-clauses 'p
-			  '(( p (¬ q) r) ( p q) (r (¬ s) p q) (a b p) ((¬ r) p s)))
+       '(((¬ R) S))))
+(print (null (extract-negative-clauses 'p
+			  '(( p (¬ q) r) ( p q) (r (¬ s) p q) (a b p) ((¬ r) p s)))))
 ;; NIL
+|#
 
+#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.4.4
 ;; resolvente de dos clausulas

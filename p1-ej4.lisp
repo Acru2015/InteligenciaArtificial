@@ -824,6 +824,8 @@
   (and (equal (get-set-diff fnc1 fnc2) nil)
        (equal (get-set-diff fnc2 fnc1) nil)))
 
+(defun reduced-clause-p (cnf)
+    (reduce #'(lambda (prev elem) (and prev (literal-p elem))) cnf :initial-value t))
 #|
 (print "cnf equal")
 (print (cnf-equal-p '(a b) '(a b)))
@@ -919,8 +921,8 @@
   (if (null cnf)
     nil
     (let* ((head (first cnf))
-	  (tail (rest cnf))
-	  (filtered-tail (remove-if #'(lambda (elem) (subsumed-by-clause elem head)) tail)))
+	   (tail (rest cnf))
+	   (filtered-tail (remove-if #'(lambda (elem) (subsumed-by-clause elem head)) tail)))
       (if (subsumed-in-cnf-p head filtered-tail)
 	(eliminate-subsumed-clauses filtered-tail)
 	(cons head (eliminate-subsumed-clauses filtered-tail))))))
@@ -941,7 +943,6 @@
 (print '((A (¬ C) B) ((¬ A)) (B C)))
 |#
 
-#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.3.5
 ;; Predicado que determina si una clausula es tautologia
@@ -954,13 +955,26 @@
   ;;
   ;; 4.3.5 Completa el codigo
   ;;
-  )
+  (if (null k)
+     nil
+    (let ((literal (first K)))
+      (if (negative-literal-p literal)
+       (let ((letter (second literal)))
+	 (if (not (null (member letter (rest k) :test #'equal)))
+	   t
+	   (tautology-p (rest k)))))
+      (if (not (null (member (list +not+ literal) (rest k) :test #'equal)))
+	t
+	(tautology-p (rest k))))))
 
 ;;
 ;;  EJEMPLOS:
 ;;
-(tautology-p '((¬ B) A C (¬ A) D)) ;;; T 
-(tautology-p '((¬ B) A C D))       ;;; NIL
+#|
+(print (tautology-p '(A (¬ A))))
+(print (equal (tautology-p '((¬ B) A C (¬ A) D)) 't)) ;;; T 
+(print (equal (tautology-p '((¬ B) A C D)) nil))       ;;; NIL
+|#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.3.6
@@ -973,17 +987,19 @@
   ;;
   ;; 4.3.6 Completa el codigo
   ;;
-  )
+  (remove-if #'tautology-p cnf))
 
 ;;
 ;;  EJEMPLOS:
 ;;
-(eliminate-tautologies 
-  '(((¬ b) a) (a (¬ a) b c) ( a (¬ b)) (s d (¬ s) (¬ s)) (a)))
+#|
+(print (eliminate-tautologies 
+  '(((¬ b) a) (a (¬ a) b c) ( a (¬ b)) (s d (¬ s) (¬ s)) (a))))
 ;; (((¬ B) A) (A (¬ B)) (A))
 
-(eliminate-tautologies '((a (¬ a) b c)))
+(print (eliminate-tautologies '((a (¬ a) b c))))
 ;; NIL
+|#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.3.7
@@ -1002,15 +1018,16 @@
   ;;
   ;; 4.3.7 Completa el codigo
   ;;
-  )
+  (eliminate-subsumed-clauses (eliminate-tautologies (eliminate-repeated-clauses (mapcar #'eliminate-repeated-literals cnf)))))
 
 ;;
 ;;  EJEMPLOS:
 ;;
-(simplify-cnf '((a a) (b) (a) ((¬ b)) ((¬ b)) (a b c a)  (s s d) (b b c a b)))
-;; ((B) ((¬ B)) (S D) (A)) ;; en cualquier orden
+(print (simplify-cnf '((a a) (b) (a) ((¬ b)) ((¬ b)) (a b c a)  (s s d) (b b c a b))))
+(print '((B) ((¬ B)) (S D) (A))) ;; en cualquier orden
 
 
+#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.4.1
 ;; Construye el conjunto de clausulas lambda-neutras para una FNC 

@@ -1041,7 +1041,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun neutral-clause-p (_lambda clause)
   (and (null (member _lambda clause :test #'equal))
-      (null (member (list +not+ _lambda) clause :test #'equal))))
+       (null (member (list +not+ _lambda) clause :test #'equal))))
 
 (defun extract-neutral-clauses (_lambda cnf) 
   ;;
@@ -1097,7 +1097,7 @@
 ;;
 #|
 (print (equal (extract-positive-clauses 'p
-			  '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
+					'((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
 	      '((P (¬ Q) R) (P Q) (A B P))))
 
 
@@ -1106,10 +1106,10 @@
 (print (null (extract-positive-clauses 'r '(NIL))))
 ;; NIL
 (print (equal (extract-positive-clauses 'r
-			  '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
+					'((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
 	      '((P (¬ Q) R) (R (¬ S) Q))))
 (print (null (extract-positive-clauses 'p
-			  '(((¬ p) (¬ q) r) ((¬ p) q) (r (¬ s) (¬ p) q) (a b (¬ p)) ((¬ r) (¬ p) s)))))
+				       '(((¬ p) (¬ q) r) ((¬ p) q) (r (¬ s) (¬ p) q) (a b (¬ p)) ((¬ r) (¬ p) s)))))
 ;; NIL
 |#
 
@@ -1136,7 +1136,7 @@
 ;;
 #|
 (print (equal (extract-negative-clauses 'p
-			  '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
+					'((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
 	      '((A (¬ P) C))))
 
 (print (null (extract-negative-clauses 'r NIL)))
@@ -1144,10 +1144,10 @@
 (print (null (extract-negative-clauses 'r '(NIL))))
 ;; NIL
 (print (equal (extract-negative-clauses 'r
-			  '((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
-       '(((¬ R) S))))
+					'((p (¬ q) r) (p q) (r (¬ s) q) (a b p) (a (¬ p) c) ((¬ r) s)))
+	      '(((¬ R) S))))
 (print (null (extract-negative-clauses 'p
-			  '(( p (¬ q) r) ( p q) (r (¬ s) p q) (a b p) ((¬ r) p s)))))
+				       '(( p (¬ q) r) ( p q) (r (¬ s) p q) (a b p) ((¬ r) p s)))))
 ;; NIL
 |#
 
@@ -1183,8 +1183,8 @@
   ;;
   ;; 4.4.4 Completa el codigo
   ;;
-    (if (or (and (has-negative-p _lambda k1) (has-positive-p _lambda k2)) (and (has-positive-p _lambda k1) (has-negative-p _lambda k2)))
-      (remove-if #'(lambda (elem) (literal-of _lambda elem)) (union k1 k2 :test #'equal))))
+  (if (or (and (has-negative-p _lambda k1) (has-positive-p _lambda k2)) (and (has-positive-p _lambda k1) (has-negative-p _lambda k2)))
+    (remove-if #'(lambda (elem) (literal-of _lambda elem)) (union k1 k2 :test #'equal))))
 
 
 ;;
@@ -1277,9 +1277,9 @@
     (if (negative-literal-p literal-b)
       (equal (second literal-a) (second literal-b))
       (equal (second literal-a) literal-b))
-  (if (negative-literal-p literal-b)
-    (equal literal-a (second literal-b))
-    (equal literal-a literal-b))))
+    (if (negative-literal-p literal-b)
+      (equal literal-a (second literal-b))
+      (equal literal-a literal-b))))
 
 #|
 (print "same-atom")
@@ -1300,7 +1300,7 @@
 #|
 (print "get literals")
 (print (get-literals
-  '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) (p) (q) ((¬ r)) ((¬ p) (¬ q) r)))) 
+	 '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) (p) (q) ((¬ r)) ((¬ p) (¬ q) r)))) 
 |#
 
 (defun res-sat-aux (literals cnf)
@@ -1314,7 +1314,7 @@
     ((null literals)
      nil)
     (t (res-sat-aux (rest literals) (simplify-cnf (build-RES (first literals) cnf))))))
-  
+
 (defun  RES-SAT-p (cnf) 
   ;;
   ;; 4.5 Completa el codigo
@@ -1332,9 +1332,9 @@
 (print (RES-SAT-p nil))  ;;; T
 (print (RES-SAT-p '((p) ((¬ q))))) ;;; T 
 (print (RES-SAT-p
-  '((a b d) ((¬ p) q) ((¬ c) a b) ((¬ b) (¬ p) d) (c d (¬ a))))) ;;; T 
+	 '((a b d) ((¬ p) q) ((¬ c) a b) ((¬ b) (¬ p) d) (c d (¬ a))))) ;;; T 
 (print (RES-SAT-p
-  '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) ((¬ q)) ((¬ p) (¬ q) r)))) ;;;T
+	 '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) ((¬ q)) ((¬ p) (¬ q) r)))) ;;;T
 ;;
 ;; UNSAT Examples
 ;;
@@ -1342,7 +1342,7 @@
 (print (null (RES-SAT-p '((S) nil))))     ;;; NIL 
 (print (null (RES-SAT-p '((p) ((¬ p)))))) ;;; NIL
 (print (null (RES-SAT-p
-  '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) (p) (q) ((¬ r)) ((¬ p) (¬ q) r))))) ;;; NIL
+	       '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) (p) (q) ((¬ r)) ((¬ p) (¬ q) r))))) ;;; NIL
 |#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -1359,68 +1359,75 @@
   ;;
   ;; 4.6 Completa el codigo
   ;;
-  )
+  (let ((base (wff-infix-to-cnf wff))
+	(under-test (wff-infix-to-cnf (list +not+ w))))
+    (not (RES-SAT-p (append base under-test)))))
 
 ;;
 ;;  EJEMPLOS:
 ;;
-(logical-consequence-RES-SAT-p NIL 'a) ;;; NIL
-(logical-consequence-RES-SAT-p NIL NIL) ;;; NIL
-(logical-consequence-RES-SAT-p '(q ^ (¬ q)) 'a) ;;; T 
-(logical-consequence-RES-SAT-p '(q ^ (¬ q)) '(¬ a)) ;;; T 
-
-(logical-consequence-RES-SAT-p '((p => (¬ p)) ^ p) 'q)
-;; T
-
-(logical-consequence-RES-SAT-p '((p => (¬ p)) ^ p) '(¬ q))
-;; T
-
-(logical-consequence-RES-SAT-p '((p => q) ^ p) 'q)
-;; T
-
-(logical-consequence-RES-SAT-p '((p => q) ^ p) '(¬q))
-;; NIL
-
-(logical-consequence-RES-SAT-p 
-  '(((¬ p) => q) ^ (p => (a v (¬ b))) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
-  '(¬ a))
-;; T
-
-(logical-consequence-RES-SAT-p 
-  '(((¬ p) => q) ^ (p => (a v (¬ b))) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
-  'a)
-;; T
-
-(logical-consequence-RES-SAT-p 
-  '(((¬ p) => q) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
-  'a)
-;; NIL
-
-(logical-consequence-RES-SAT-p 
-  '(((¬ p) => q) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
-  '(¬ a))
-;; T
-
-(logical-consequence-RES-SAT-p 
-  '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
-  'q)
-;; NIL
-
-(logical-consequence-RES-SAT-p 
-  '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
-  '(¬ q))
-;; NIL
-
-(or 
-  (logical-consequence-RES-SAT-p '((p => q) ^ p) '(¬q))      ;; NIL
-  (logical-consequence-RES-SAT-p 
-    '(((¬ p) => q) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
-    'a) ;; NIL
-  (logical-consequence-RES-SAT-p 
-    '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
-    'q) ;; NIL
-  (logical-consequence-RES-SAT-p 
-    '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
-    '(¬ q)))
 #|
+(print "logical-consequence-RES-SAT-p")
+(print (null (logical-consequence-RES-SAT-p NIL 'a))) ;;; NIL
+(print (null (logical-consequence-RES-SAT-p NIL NIL))) ;;; NIL
+(print (logical-consequence-RES-SAT-p '(q ^ (¬ q)) 'a)) ;;; T 
+(print (logical-consequence-RES-SAT-p '(q ^ (¬ q)) '(¬ a))) ;;; T 
+
+(print (logical-consequence-RES-SAT-p '((p => (¬ p)) ^ p) 'q))
+;; T
+
+(print (logical-consequence-RES-SAT-p '((p => (¬ p)) ^ p) '(¬ q)))
+;; T
+
+(print (logical-consequence-RES-SAT-p '((p => q) ^ p) 'q))
+;; T
+
+(print (null (logical-consequence-RES-SAT-p '((p => q) ^ p) '(¬q))))
+;; NIL
+
+(print (logical-consequence-RES-SAT-p 
+	 '(((¬ p) => q) ^ (p => (a v (¬ b))) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+	 '(¬ a)))
+;; T
+
+(print (logical-consequence-RES-SAT-p 
+	 '(((¬ p) => q) ^ (p => (a v (¬ b))) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+	 'a))
+;; T
+
+(print (null (logical-consequence-RES-SAT-p 
+	       '(((¬ p) => q) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+	       'a)))
+;; NIL
+(print (wff-infix-to-cnf '(((¬ p) => q) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q))))))
+(print (wff-infix-to-cnf (list +not+ 'a)))
+(print (append 
+	 (wff-infix-to-cnf '(((¬ p) => q) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))))
+	 (wff-infix-to-cnf (list +not+ 'a))))
+
+(print (logical-consequence-RES-SAT-p 
+	 '(((¬ p) => q) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+	 '(¬ a)))
+;; T
+
+(print (null (logical-consequence-RES-SAT-p 
+	       '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+	       'q)))
+;; NIL
+
+(print (null (logical-consequence-RES-SAT-p 
+	       '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+	       '(¬ q))))
+;; NIL
+
+(print (null (logical-consequence-RES-SAT-p '((p => q) ^ p) '(¬q))))      ;; NIL
+(print (null (logical-consequence-RES-SAT-p 
+	       '(((¬ p) => q) ^ (p => ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+	       'a))) ;; NIL
+(print (null (logical-consequence-RES-SAT-p 
+	       '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+	       'q))) ;; NIL
+(print (null (logical-consequence-RES-SAT-p 
+	       '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
+	       '(¬ q))))
 |#

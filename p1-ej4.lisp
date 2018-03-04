@@ -1163,7 +1163,7 @@
 ;;                          eliminados
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defun member-of-p (_lambda clause)
-  (reduce #'(lambda (prev elem) (or (equal elem _lambda) prev)) clause :initial-value 'f))
+  (reduce #'(lambda (prev elem) (or (equal elem _lambda) prev)) clause :initial-value 'nil))
 
 (defun has-positive-p (_lambda clause)
   (member-of-p _lambda clause))
@@ -1172,7 +1172,8 @@
   (member-of-p (list +not+ _lambda) clause))
 
 (defun has-literal-p (_lambda clause)
-  (or (has-negative-p _lambda clause) (has-positive-p _lambda clause)))
+  (or (has-negative-p _lambda clause) 
+      (has-positive-p _lambda clause)))
 
 (defun literal-of (_lambda elem)
   (or (equal (list +not+ _lambda) elem) (equal elem _lambda)))
@@ -1181,17 +1182,19 @@
   ;;
   ;; 4.4.4 Completa el codigo
   ;;
-  (if (and (has-literal-p _lambda k1) (has-literal-p _lambda k2))
-    (if (and (has-negative-p _lambda k1) (has-positive-p _lambda k2))
-      (remove-if #'(lambda (elem) (literal-of _lambda elem)) (union k1 k2)))))
+    (if (or (and (has-negative-p _lambda k1) (has-positive-p _lambda k2)) (and (has-positive-p _lambda k1) (has-negative-p _lambda k2)))
+      (remove-if #'(lambda (elem) (literal-of _lambda elem)) (union k1 k2 :test #'equal))))
 
 
 ;;
 ;;  EJEMPLOS:
 ;;
 #|
+(print "resolve on")
 (print (null (resolve-on 'p '(a p) '(b p))))
-(print (null (resolve-on 'p '(a p) '(b p))))
+(print (resolve-on 'p '(a p) '(b (¬ p))))
+(print (resolve-on 'p '(a p) '(a (¬ p))))
+(print (resolve-on 'p '((¬ a) p) '((¬ a) (¬ p))))
 (print (resolve-on 'p '(a b (¬ c) p) '((¬ p) b a q r s)))
 ;; (((¬ C) B A Q R S))
 
@@ -1215,7 +1218,6 @@
 ;; NIL
 |#
 
-#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.4.5
 ;; Construye el conjunto de clausulas RES para una FNC 
@@ -1225,32 +1227,40 @@
 ;;            
 ;; EVALUA A : RES_lambda(cnf) con las clauses repetidas eliminadas
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defun build-RES (lambda cnf)
+(defun build-RES-aux (_lambda clause clauses)
+  (mapcar #'(lambda (clause2) (resolve-on _lambda clause clause2)) clauses))
+
+(defun build-RES (_lambda cnf)
   ;;
   ;; 4.4.5 Completa el codigo
   ;;
-  )
+  (let ((alpha-neutral (extract-neutral-clauses _lambda cnf))
+	(alpha-positive (extract-positive-clauses _lambda cnf))
+	(alpha-negative (extract-negative-clauses _lambda cnf)))
+    (remove-duplicates (union alpha-neutral (mapcan #'(lambda (clause) (build-RES-aux _lambda clause alpha-negative)) alpha-positive)) :test #'cnf-equal-p)))
 
 ;;
 ;;  EJEMPLOS:
 ;;
-(build-RES 'p NIL)
+(print "build res")
+(print (null (build-RES 'p NIL)))
 ;; NIL
-(build-RES 'P '((A  (¬ P) B) (A P) (A B)));; ((A B))
-(build-RES 'P '((B  (¬ P) A) (A P) (A B)));; ((B A))
+(print (build-RES 'P '((A  (¬ P) B) (A P) (A B))));; ((A B))
+(print (build-RES 'P '((B  (¬ P) A) (A P) (A B))));; ((B A))
 
-(build-RES 'p '(NIL))
+(print (equal (build-RES 'p '(NIL)) '(nil)))
 ;; (NIL)
 
-(build-RES 'p '((p) ((¬ p))))
+(print (equal (build-RES 'p '((p) ((¬ p)))) '(nil)))
 ;; (NIL)
 
-(build-RES 'q '((p q) ((¬ p) q) (a b q) (p (¬ q)) ((¬ p) (¬ q))))
-;; ((P) ((¬ P) P) ((¬ P)) (B A P) (B A (¬ P)))
+(print (build-RES 'q '((p q) ((¬ p) q) (a b q) (p (¬ q)) ((¬ p) (¬ q)))))
+(print '((P) ((¬ P) P) ((¬ P)) (B A P) (B A (¬ P))))
 
-(build-RES 'p '((p q) (c q) (a b q) (p (¬ q)) (p (¬ q))))
+(print (build-RES 'p '((p q) (c q) (a b q) (p (¬ q)) (p (¬ q)))))
 ;; ((A B Q) (C Q))
 
+#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.5
 ;; Comprueba si una FNC es SAT calculando RES para todos los

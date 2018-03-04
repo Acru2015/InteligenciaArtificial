@@ -9,6 +9,7 @@
 (defconstant +and+    '^)
 (defconstant +or+     'v)
 (defconstant +not+    '¬)
+(defconstant f nil)
 
 (defun truth-value-p (x) 
   (or (eql x T) (eql x NIL)))
@@ -1242,6 +1243,7 @@
 ;;
 ;;  EJEMPLOS:
 ;;
+#|
 (print "build res")
 (print (null (build-RES 'p NIL)))
 ;; NIL
@@ -1259,8 +1261,8 @@
 
 (print (build-RES 'p '((p q) (c q) (a b q) (p (¬ q)) (p (¬ q)))))
 ;; ((A B Q) (C Q))
+|#
 
-#|
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.5
 ;; Comprueba si una FNC es SAT calculando RES para todos los
@@ -1270,11 +1272,54 @@
 ;; EVALUA A :	T  si cnf es SAT
 ;;                NIL  si cnf es UNSAT
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defun same-atom-p (literal-a literal-b)
+  (if (negative-literal-p literal-a)
+    (if (negative-literal-p literal-b)
+      (equal (second literal-a) (second literal-b))
+      (equal (second literal-a) literal-b))
+  (if (negative-literal-p literal-b)
+    (equal literal-a (second literal-b))
+    (equal literal-a literal-b))))
+
+#|
+(print "same-atom")
+(print (same-atom-p 'a 'a))
+(print (same-atom-p 'a 'b))
+(print (same-atom-p 'a '(¬ a)))
+(print (same-atom-p 'a '(¬ b)))
+(print (same-atom-p '(¬ a) '(¬ a)))
+|#
+
+
+(defun get-literals (cnf)
+  (mapcar #'(lambda (elem) (if (negative-literal-p elem) (second elem) elem))
+	  (reduce #'(lambda (prev elem) (union prev elem :test #'same-atom-p)) 
+		  cnf 
+		  :initial-value '() )))
+
+#|
+(print "get literals")
+(print (get-literals
+  '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) (p) (q) ((¬ r)) ((¬ p) (¬ q) r)))) 
+|#
+
+(defun res-sat-aux (literals cnf)
+  (cond
+    ((null cnf)
+     t)
+    ((equal cnf '(nil))
+     nil)
+    ((not (null (member nil cnf)))
+     nil)
+    ((null literals)
+     nil)
+    (t (res-sat-aux (rest literals) (simplify-cnf (build-RES (first literals) cnf))))))
+  
 (defun  RES-SAT-p (cnf) 
   ;;
   ;; 4.5 Completa el codigo
   ;;
-  )
+  (res-sat-aux (get-literals cnf) cnf))
 
 ;;
 ;;  EJEMPLOS:
@@ -1282,20 +1327,23 @@
 ;;
 ;; SAT Examples
 ;;
-(RES-SAT-p nil)  ;;; T
-(RES-SAT-p '((p) ((¬ q)))) ;;; T 
-(RES-SAT-p
-  '((a b d) ((¬ p) q) ((¬ c) a b) ((¬ b) (¬ p) d) (c d (¬ a)))) ;;; T 
-(RES-SAT-p
-  '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) ((¬ q)) ((¬ p) (¬ q) r))) ;;;T
+#|
+(print "res sat")
+(print (RES-SAT-p nil))  ;;; T
+(print (RES-SAT-p '((p) ((¬ q))))) ;;; T 
+(print (RES-SAT-p
+  '((a b d) ((¬ p) q) ((¬ c) a b) ((¬ b) (¬ p) d) (c d (¬ a))))) ;;; T 
+(print (RES-SAT-p
+  '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) ((¬ q)) ((¬ p) (¬ q) r)))) ;;;T
 ;;
 ;; UNSAT Examples
 ;;
-(RES-SAT-p '(nil))         ;;; NIL
-(RES-SAT-p '((S) nil))     ;;; NIL 
-(RES-SAT-p '((p) ((¬ p)))) ;;; NIL
-(RES-SAT-p
-  '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) (p) (q) ((¬ r)) ((¬ p) (¬ q) r))) ;;; NIL
+(print (null (RES-SAT-p '(nil))))         ;;; NIL
+(print (null (RES-SAT-p '((S) nil))))     ;;; NIL 
+(print (null (RES-SAT-p '((p) ((¬ p)))))) ;;; NIL
+(print (null (RES-SAT-p
+  '(((¬ p) (¬ q) (¬ r)) (q r) ((¬ q) p) (p) (q) ((¬ r)) ((¬ p) (¬ q) r))))) ;;; NIL
+|#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; EJERCICIO 4.6:
@@ -1374,4 +1422,5 @@
   (logical-consequence-RES-SAT-p 
     '(((¬ p) => q) ^ (p <=> ((¬ a) ^ b)) ^ ( (¬ p) => (r  ^ (¬ q)))) 
     '(¬ q)))
+#|
 |#

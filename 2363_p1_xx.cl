@@ -208,12 +208,14 @@
 (write-line "")
 
 (defun combine-elt-lst (-elt lst)
-  (mapcar #'(lambda(elem) (append (list -elt) elem)) lst))
+  (mapcar #'(lambda(elem) (append (if (listp -elt) -elt (list -elt)) (list elem))) lst))
 
 (write-line "combine-elt-lst")
 (write (combine-elt-lst 'a nil))
 (write-line "")
 (write (combine-elt-lst 'a '(1 2 3)))
+(write-line "")
+(write (combine-elt-lst '(a b c) '(1 2 3)))
 (write-line "")
 
 (defun combine-lst-lst (lst1 lst2)

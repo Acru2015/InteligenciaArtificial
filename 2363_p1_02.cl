@@ -163,7 +163,7 @@
 (defun bisect (f a b tol)
   (when (root-in-intervall f a b)
     (let ((x (middle-x a b)))
-      (if (or (= x 0) (below-limit a b tol))
+      (if (or (= (funcall f x ) 0) (below-limit a b tol))
 	x
 	(if (in-lower-interval f a x)
 	  (bisect f a x tol)
@@ -179,17 +179,31 @@
 (write-line "")
 (write (bisect #'(lambda (x) (sin (* 6.28 x))) 1.1 2.1 0.001))
 (write-line "")
+(write (bisect #'(lambda (x) (- (* 2 x) 3)) 1.1 2.1 0.001))
+(write-line "")
+(write (bisect #'(lambda (x) (- (* 2 x) 3)) 1.25 1.75 0.001))
+(write-line "")
 |#
 
 (defun get-couples (lst)
   (mapcar 'cons lst (rest lst)))
 
+#|
+(print "get couples")
+(print (get-couples '(0.25 0.75 1.25 1.75 2.25)))
+|#
+
+(defun allroot-aux (f upper lower tol)
+  (let ((result (bisect f upper lower tol)))
+    (if result (list result) nil)))
+
 (defun allroot (f lst tol)
-  (mapcan #'(lambda (interval) (list (bisect f (car interval) (cdr interval) tol))) (get-couples lst)))
+  (mapcan #'(lambda (interval) (allroot-aux f (car interval) (cdr interval) tol)) (get-couples lst)))
 
 #|
-(write-line "All roots")
 (write (allroot #'(lambda(x) (sin (* 6.28 x))) '(0.25 0.75 1.25 1.75 2.25) 0.0001))
+(write-line "")
+(write (allroot #'(lambda(x) (- (* 2 x) 3)) '(0.25 0.75 1.25 1.75 2.25) 0.0001))
 (write-line "")
 |#
 
@@ -275,7 +289,7 @@
     (rec-combine (combine-lst-lst combined (first to-combine)) (rest to-combine))))
 
 (defun combine-list-of-lsts (lstolsts)
-  (rec-combine (first lstolsts) (rest lstolsts)))
+  (rec-combine '(nil) lstolsts))
 
 #|
 (defun combine-list-of-lsts (lstolst)
@@ -287,7 +301,6 @@
 ;(defun combine-list-of-lsts (lstolsts)
 ;  (mapcar #'(lambda (elem) (combine-elt-lst elem (second lstolsts))) (first lstolsts)))
 
-#|
 (write-line "combine-list-of-lsts")
 (write (combine-list-of-lsts '(() (+ -) (1 2 3 4))))
 (write-line "")
@@ -299,7 +312,6 @@
 (write-line "")
 (write (combine-list-of-lsts '((a b c) (+ -) (1 2 3 4))))
 (write-line "")
-|#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Definicion de simbolos que representan valores de verdad,

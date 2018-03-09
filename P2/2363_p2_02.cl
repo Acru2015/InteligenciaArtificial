@@ -86,3 +86,42 @@
   node-compare-p)		; boolean comparison
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;;;;;;;;;;;;;;;;;;;;;;
+;; f-h-galaxy 
+;; Returns the approximated distance from a planet to the goal
+;; state: name of the planet
+;; sensors: list of (k v) pairs for h
+;; devuelves: approximacion h(x) for the distance between state and destination
+;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun f-h-galaxy (state sensors)
+  (second (assoc state sensors)))
+
+#|
+(print (equal (f-h-galaxy 'Sirtis *sensors*) 0))
+(print (equal (f-h-galaxy 'Avalon *sensors*) 15))
+(print (equal (f-h-galaxy 'Earth *sensors*) nil)) ;-> NIL
+|#
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; navigate-white-hole
+;; returns all possible paths through white holes from the planet "state"
+;; state: nombre del planeto
+;; white-holes: list of white hole paths leading from states to other planets
+(defun action-name-route (name route)
+  (make-action :name name
+	       :origin (first route)
+	       :final (second route)
+	       :cost (third route)))
+
+(defun create-action-white-hole (route)
+  (action-name-route "navigate-white-hole" route))
+
+(defun get-routes-for (state routes)
+  (remove-if #'(lambda (route) (not (equal (first route) state))) routes))
+
+(defun navigate-white-hole (state white-holes)
+  (mapcar #'(lambda (route) (create-action-white-hole route)) (get-routes-for state white-holes)))
+
+(print (navigate-white-hole 'Kentares *white-holes*))

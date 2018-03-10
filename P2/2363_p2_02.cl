@@ -187,6 +187,12 @@
 (print (f-goal-test-galaxy node-04 '(Kentares Uranus) '(Avalon Katril)))
 |#
 
+(defun navigate-white-hole-aux (state)
+  (navigate-white-hole state *white-holes*))
+
+(defun navigate-worm-hole-aux (state)
+  (navigate-worm-hole state *worm-holes* *planets-forbidden*))
+
 (defparameter *galaxy-M35*
   (make-problem
     :states 		*planets*
@@ -195,8 +201,29 @@
 			 	(f-goal-test-galaxy node *planets-destination*
 					*planets-mandatory*))
     :f-h		#'(lambda (node)
-			    (second (assoc (noed-state) *sensors)))
-    :operators	(list 'navigate-worm-hole 'navigate-white-hole)))
+			    (second (assoc node *sensors*)))
+    :operators	(list 'navigate-worm-hole-aux 'navigate-white-hole-aux)))
+
+(defun get-actions (state operators)
+  (mapcan #'(lambda (operator) (funcall operator state)) operators))
+
+(defun generate-target-node (action parent f-h)
+  (let* ((state (action-final action))
+	 (depth (+ (node-depth parent) 1))
+	 (g (+ (node-g parent) (action-cost action)))
+	 (h (funcall f-h state)))
+  (make-node :state state
+	     :parent parent
+	     :action action
+	     :depth depth
+	     :g g 
+	     :h h
+	     :f (+ g h))))
+
+(defun generate-target-nodes (node f-h actions)
+  (mapcar #'(lambda (action) (generate-target-node action node f-h)) actions))
 
 (defun expand-node (node problem)
-  (mapcar #'(lambda (operator) )
+  (generate-target-nodes node (problem-f-h problem) (get-actions (node-state node) (problem-operators problem))))
+
+(print (expand-node (make-node :state 'Kentares :depth 0 :g 0 :f 0) *galaxy-M35*))

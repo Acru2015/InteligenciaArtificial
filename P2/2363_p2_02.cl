@@ -149,6 +149,15 @@
 (print (navigate-worm-hole 'Mallory *worm-holes* nil))
 |#
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; f-goal-test-galaxy
+;; goal test, checks whether current state is a destination and all mandatory planets have been visited
+;; node: current location, with nodepath
+;; planets-destination: planets which are a viable end state
+;; planets-mandatory: planets which must be visited
+;; returns: true or false
+
+(
 (defun visited (planets nodepath)
   (cond 
     ((null planets)
@@ -172,7 +181,11 @@
 (defparameter node-04
   (make-node :state 'Kentares :parent node-03))
 
+#|
 (print (null (f-goal-test-galaxy node-01 '(Kentares Uranus) '(Avalon Katril))))
 (print (null (f-goal-test-galaxy node-02 '(Kentares Uranus) '(Avalon Katril))))
 (print (null (f-goal-test-galaxy node-03 '(Kentares Uranus) '(Avalon Katril))))
 (print (f-goal-test-galaxy node-04 '(Kentares Uranus) '(Avalon Katril)))
+|#
+
+

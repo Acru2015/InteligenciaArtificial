@@ -196,5 +196,7 @@
 					*planets-mandatory*))
     :f-h		#'(lambda (node)
 			    (second (assoc (noed-state) *sensors)))
-
     :operators	(list 'navigate-worm-hole 'navigate-white-hole)))
+
+(defun expand-node (node problem)
+  (mapcar #'(lambda (operator) )

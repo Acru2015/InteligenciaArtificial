@@ -109,6 +109,8 @@
 ;; returns all possible paths through white holes from the planet "state"
 ;; state: nombre del planeto
 ;; white-holes: list of white hole paths leading from states to other planets
+;; returns: actions through white holes possible from the current state
+
 (defun action-name-route (name route)
   (make-action :name name
 	       :origin (first route)
@@ -118,10 +120,59 @@
 (defun create-action-white-hole (route)
   (action-name-route "navigate-white-hole" route))
 
+(defun create-action-worm-hole (route)
+  (action-name-route "navigate-worm-hole" route))
+
 (defun get-routes-for (state routes)
   (remove-if #'(lambda (route) (not (equal (first route) state))) routes))
 
 (defun navigate-white-hole (state white-holes)
   (mapcar #'(lambda (route) (create-action-white-hole route)) (get-routes-for state white-holes)))
 
+(defun filter-forbidden (routes forbidden)
+  (remove-if #'(lambda (route) (find (second route) forbidden :test #'equal)) routes))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; navigate-worm-hole
+;; returns all possible paths through worm holes from the planet "state"
+;; state: name of the planet
+;; worm-holes: list of worm hole paths leading from states to other planets
+;; forbidden: planets which may not be visited
+;; returns: actions through worm holes possible from the current state
+
+(defun navigate-worm-hole (state worm-holes planets-forbidden)
+  (mapcar #'(lambda (route) (create-action-worm-hole route)) (filter-forbidden (get-routes-for state worm-holes) planets-forbidden)))
+
+#|
 (print (navigate-white-hole 'Kentares *white-holes*))
+(print (navigate-worm-hole 'Mallory *worm-holes* *planets-forbidden*))
+(print (navigate-worm-hole 'Mallory *worm-holes* nil))
+|#
+
+(defun visited (planets nodepath)
+  (cond 
+    ((null planets)
+     t)
+    ((null nodepath)
+     nil)
+    ((find (node-state nodepath) planets)
+     (visited (remove-if #'(lambda (planet) (equal planet (node-state nodepath))) planets) (node-parent nodepath)))
+    (t
+      (visited planets (node-parent nodepath)))))
+
+(defun f-goal-test-galaxy (node planets-destination planets-mandatory)
+  (and (find (node-state node) planets-destination) (visited planets-mandatory node)))
+
+(defparameter node-01
+  (make-node :state 'Avalon) )
+(defparameter node-02
+  (make-node :state 'Kentares :parent node-01))
+(defparameter node-03
+  (make-node :state 'Katril :parent node-02))
+(defparameter node-04
+  (make-node :state 'Kentares :parent node-03))
+
+(print (null (f-goal-test-galaxy node-01 '(Kentares Uranus) '(Avalon Katril))))
+(print (null (f-goal-test-galaxy node-02 '(Kentares Uranus) '(Avalon Katril))))
+(print (null (f-goal-test-galaxy node-03 '(Kentares Uranus) '(Avalon Katril))))
+(print (f-goal-test-galaxy node-04 '(Kentares Uranus) '(Avalon Katril)))

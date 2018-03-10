@@ -157,7 +157,6 @@
 ;; planets-mandatory: planets which must be visited
 ;; returns: true or false
 
-(
 (defun visited (planets nodepath)
   (cond 
     ((null planets)
@@ -188,4 +187,14 @@
 (print (f-goal-test-galaxy node-04 '(Kentares Uranus) '(Avalon Katril)))
 |#
 
+(defparameter *galaxy-M35*
+  (make-problem
+    :states 		*planets*
+    :initial-state 	*planet-origin*
+    :f-goal-test	#'(lambda (node)
+			 	(f-goal-test-galaxy node *planets-destination*
+					*planets-mandatory*))
+    :f-h		#'(lambda (node)
+			    (second (assoc (noed-state) *sensors)))
 
+    :operators	(list 'navigate-worm-hole 'navigate-white-hole)))

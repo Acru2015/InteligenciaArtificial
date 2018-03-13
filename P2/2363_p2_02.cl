@@ -198,43 +198,16 @@
     :states 		*planets*
     :initial-state 	*planet-origin*
     :f-goal-test	#'(lambda (node)
-			 	(f-goal-test-galaxy node *planets-destination*
-					*planets-mandatory*))
+			    (f-goal-test-galaxy node *planets-destination*
+						*planets-mandatory*))
     :f-h		#'(lambda (node)
 			    (second (assoc node *sensors*)))
     :operators	(list 'navigate-worm-hole-aux 'navigate-white-hole-aux)))
 
-(defun get-actions (state operators)
-  (mapcan #'(lambda (operator) (funcall operator state)) operators))
-
-(defun generate-target-node (action parent f-h)
-  (let* ((state (action-final action))
-	 (depth (+ (node-depth parent) 1))
-	 (g (+ (node-g parent) (action-cost action)))
-	 (h (funcall f-h state)))
-  (make-node :state state
-	     :parent parent
-	     :action action
-	     :depth depth
-	     :g g 
-	     :h h
-	     :f (+ g h))))
-
-(defun generate-target-nodes (node f-h actions)
-  (mapcar #'(lambda (action) (generate-target-node action node f-h)) actions))
-
-(defun expand-node (node problem)
-  (generate-target-nodes node (problem-f-h problem) (get-actions (node-state node) (problem-operators problem))))
-
-(print (expand-node (make-node :state 'Kentares :depth 0 :g 0 :f 0) *galaxy-M35*))
-
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EJERCICIO5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EJERCICIO5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (setf node-00
-(make-node :state 'Proserpina :depth 12 :g 10 :f 20))
+      (make-node :state 'Proserpina :depth 12 :g 10 :f 20))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;	(defun expand-node (node problem)
@@ -249,55 +222,55 @@
 ;;;
 (defun expand-node (node problem)
   (if (null node)
-      NIL
+    NIL
     (if (null problem)
-        NIL
+      NIL
       (mapcar #'(lambda (x) ( make-node 
-                             :state (action-final x)
-                             :parent node
-                             :action x
-                             ;;depth = 1+node-depth node
-                             :depth (+ 1 (if (node-depth node) 
-                                             (node-depth node) 
-                                           0)) 
-                             :g (+ (if (node-g node) 
-                                       (node-g node) 
-                                     0 ) 
-                                   (if(action-cost x) ;g=node-g + cost
-                                       (action-cost x) 
-                                     0 ))
-                             :h (funcall (fn-name (problem-fn-h problem)) ;h=sensors
-                                         (action-final x) 
-                                         (fn-lst-args (problem-fn-h problem))) 
-                             ;;f= g+h
-                             :f (+ (+ (if (node-g node) 
-                                          (node-g node) 
-                                        0 ) 
-                                      (if(action-cost x) 
-                                          (action-cost x) 
-                                        0 )) 
-                                   
-                                   (if (null (funcall (fn-name (problem-fn-h problem)) 
-                                                      (action-final x) 
-                                                      (fn-lst-args (problem-fn-h problem)))
-                                             ) 0 
-                                     (funcall (fn-name (problem-fn-h problem)) 
-                                              (action-final x) 
-                                              (fn-lst-args (problem-fn-h problem))) ))  
-                             
-                             )) 
-        ;;todos los elementos de las 2 listas donde se encuentra el nombre de node-name
+			      :state (action-final x)
+			      :parent node
+			      :action x
+			      ;;depth = 1+node-depth node
+			      :depth (+ 1 (if (node-depth node) 
+					    (node-depth node) 
+					    0)) 
+			      :g (+ (if (node-g node) 
+				      (node-g node) 
+				      0 ) 
+				    (if(action-cost x) ;g=node-g + cost
+				      (action-cost x) 
+				      0 ))
+			      :h (funcall (fn-name (problem-fn-h problem)) ;h=sensors
+					  (action-final x) 
+					  (fn-lst-args (problem-fn-h problem))) 
+			      ;;f= g+h
+			      :f (+ (+ (if (node-g node) 
+					 (node-g node) 
+					 0 ) 
+				       (if(action-cost x) 
+					 (action-cost x) 
+					 0 )) 
 
-        (append          
-         
-         (funcall(fn-name (first (problem-operators problem ))) 
-                  (node-state node) 
-                  (fn-lst-args (first (problem-operators problem )))) 
-         
-         (funcall (fn-name (second (problem-operators problem ))) 
-                  (node-state node) 
-                  (fn-lst-args (second (problem-operators problem )))))))))
-		
+				    (if (null (funcall (fn-name (problem-fn-h problem)) 
+						       (action-final x) 
+						       (fn-lst-args (problem-fn-h problem)))
+					      ) 0 
+				      (funcall (fn-name (problem-fn-h problem)) 
+					       (action-final x) 
+					       (fn-lst-args (problem-fn-h problem))) ))  
+
+			      )) 
+	      ;;todos los elementos de las 2 listas donde se encuentra el nombre de node-name
+
+	      (append          
+
+		(funcall(fn-name (first (problem-operators problem ))) 
+		  (node-state node) 
+		  (fn-lst-args (first (problem-operators problem )))) 
+
+		(funcall (fn-name (second (problem-operators problem ))) 
+			 (node-state node) 
+			 (fn-lst-args (second (problem-operators problem )))))))))
+
 ;;;
 ;;;	EJEMPLOS:
 ;;;		(expand-node node-00 *galaxy-M35*)	;->Caso tipico	;->
@@ -305,3 +278,61 @@
 ;;;			(expand-node node-08 *galaxy-M35*)	;->NIL	;->Caso especial
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun node-g-<= (node-1 node-2)
+  (<= (node-g node-1)
+      (node-g node-2)))
+
+(defparameter *uniform-cost*
+  (make-strategy
+    :name 'uniform-cost
+    :node-compare-p #'node-g-<=))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;
+;;; Insert a list of nodes into another list of nodes
+;;;
+;;; nodes: list of nodes to insert, unordered
+;;; lst-nodes: list of nodes to insert 'nodes' into, ordered
+;;; strategy: strategy to use
+
+(defun insert-node-strategy (node lst-nodes strategy)
+  (cond
+    ((null lst-nodes)
+     (list node))
+     ((funcall (strategy-node-compare-p strategy) node (first lst-nodes))
+      (cons node lst-nodes))
+     (t 
+       (cons (first lst-nodes) (insert-node-strategy node (rest lst-nodes) strategy)))))
+
+#|
+(print "insert node")
+(print (insert-node-strategy (make-node :g 3) (list (make-node :g 4)) *uniform-cost*))
+(print (insert-node-strategy (make-node :g 3) (list (make-node :g 1) (make-node :g 2) (make-node :g 4)) *uniform-cost*))
+(print (insert-node-strategy (make-node :g 3) (list (make-node :g 1) (make-node :g 2) (make-node :g 2)) *uniform-cost*))
+|#
+
+(defun insert-nodes-strategy (nodes lst-nodes strategy)
+  (if (null nodes)
+    lst-nodes
+    (insert-nodes-strategy (rest nodes) (insert-node-strategy (first nodes) lst-nodes strategy) strategy)))
+
+(defparameter node-01
+  (make-node :state 'Avalon :depth 0 :g 0 :f 0) )
+(defparameter node-02
+  (make-node :state 'Kentares :depth 2 :g 50 :f 50) )
+;;(defparameter lst-nodes-00)
+
+#|
+(print (insert-nodes-strategy (list node-00 node-01 node-02)
+			      lst-nodes-00
+			      *uniform-cost*))
+
+(print (insert-nodes-strategy (list node-00 node-01 node-02)
+			      (sort (copy-list lst-nodes-00) #'<= :key #'node-g)
+			      *uniform-cost*))
+|#
+
+(print (insert-nodes-strategy '(4 8 6 2) '(1 3 5 7)
+		       (make-strategy :name 'simple
+				      :node-compare-p #'<)))

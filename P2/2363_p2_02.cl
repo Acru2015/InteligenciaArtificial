@@ -227,3 +227,81 @@
   (generate-target-nodes node (problem-f-h problem) (get-actions (node-state node) (problem-operators problem))))
 
 (print (expand-node (make-node :state 'Kentares :depth 0 :g 0 :f 0) *galaxy-M35*))
+
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EJERCICIO6;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(setf node-00
+(make-node :state 'Proserpina :depth 12 :g 10 :f 20))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;	(defun expand-node (node problem)
+;;;	Expande el nodo en funcion del problema a tratar, devolviendo todos los nodos 
+;;;   a los que se puede ir.
+;;;
+;;;	INPUT: 
+;;;		node: Nodo a expandir
+;;;		problem: Problema bajo estudio segun el cual realizar la expansion
+;;;	OUTPUT:
+;;;		Nodos a los que se puede ir desde el nodo expandido o NIL
+;;;
+(defun expand-node (node problem)
+  (if (null node)
+      NIL
+    (if (null problem)
+        NIL
+      (mapcar #'(lambda (x) ( make-node 
+                             :state (action-final x)
+                             :parent node
+                             :action x
+                             ;;depth = 1+node-depth node
+                             :depth (+ 1 (if (node-depth node) 
+                                             (node-depth node) 
+                                           0)) 
+                             :g (+ (if (node-g node) 
+                                       (node-g node) 
+                                     0 ) 
+                                   (if(action-cost x) ;g=node-g + cost
+                                       (action-cost x) 
+                                     0 ))
+                             :h (funcall (fn-name (problem-fn-h problem)) ;h=sensors
+                                         (action-final x) 
+                                         (fn-lst-args (problem-fn-h problem))) 
+                             ;;f= g+h
+                             :f (+ (+ (if (node-g node) 
+                                          (node-g node) 
+                                        0 ) 
+                                      (if(action-cost x) 
+                                          (action-cost x) 
+                                        0 )) 
+                                   
+                                   (if (null (funcall (fn-name (problem-fn-h problem)) 
+                                                      (action-final x) 
+                                                      (fn-lst-args (problem-fn-h problem)))
+                                             ) 0 
+                                     (funcall (fn-name (problem-fn-h problem)) 
+                                              (action-final x) 
+                                              (fn-lst-args (problem-fn-h problem))) ))  
+                             
+                             )) 
+        ;;todos los elementos de las 2 listas donde se encuentra el nombre de node-name
+
+        (append          
+         
+         (funcall(fn-name (first (problem-operators problem ))) 
+                  (node-state node) 
+                  (fn-lst-args (first (problem-operators problem )))) 
+         
+         (funcall (fn-name (second (problem-operators problem ))) 
+                  (node-state node) 
+                  (fn-lst-args (second (problem-operators problem )))))))))
+		
+;;;
+;;;	EJEMPLOS:
+;;;		(expand-node node-00 *galaxy-M35*)	;->Caso tipico	;->
+;;;		(setf node-08 (make-node :state 'Tierra :depth 1 :g 1 :f 2))
+;;;			(expand-node node-08 *galaxy-M35*)	;->NIL	;->Caso especial
+;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

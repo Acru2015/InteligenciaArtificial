@@ -251,64 +251,7 @@
 (print (expand-node node-08 *galaxy-M35*))	;->NIL	;->Caso especial
 |#
 
-
-#|
-(defun expand-node (node problem)
-  (if (null node)
-    NIL
-    (if (null problem)
-      NIL
-      (mapcar #'(lambda (x) ( make-node 
-			      :state (action-final x)
-			      :parent node
-			      :action x
-			      ;;depth = 1+node-depth node
-			      :depth (+ 1 (if (node-depth node) 
-					    (node-depth node) 
-					    0)) 
-			      :g (+ (if (node-g node) 
-				      (node-g node) 
-				      0 ) 
-				    (if(action-cost x) ;g=node-g + cost
-				      (action-cost x) 
-				      0 ))
-			      :h (funcall (fn-name (problem-fn-h problem)) ;h=sensors
-					  (action-final x) 
-					  (fn-lst-args (problem-fn-h problem))) 
-			      ;;f= g+h
-			      :f (+ (+ (if (node-g node) 
-					 (node-g node) 
-					 0 ) 
-				       (if(action-cost x) 
-					 (action-cost x) 
-					 0 )) 
-
-				    (if (null (funcall (fn-name (problem-fn-h problem)) 
-						       (action-final x) 
-						       (fn-lst-args (problem-fn-h problem)))
-					      ) 0 
-				      (funcall (fn-name (problem-fn-h problem)) 
-					       (action-final x) 
-					       (fn-lst-args (problem-fn-h problem))) ))  
-
-			      )) 
-	      ;;todos los elementos de las 2 listas donde se encuentra el nombre de node-name
-
-	      (append          
-
-		(funcall(fn-name (first (problem-operators problem ))) 
-		  (node-state node) 
-		  (fn-lst-args (first (problem-operators problem )))) 
-
-		(funcall (fn-name (second (problem-operators problem ))) 
-			 (node-state node) 
-			 (fn-lst-args (second (problem-operators problem )))))))))
-
-;;;
-;;;	EJEMPLOS:
-;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-|#
 
 (defun node-g-<= (node-1 node-2)
   (<= (node-g node-1)
@@ -442,8 +385,9 @@
 (defun solution-path (node)
   (path-of-property #'node-state node))
 
-(print (solution-path nil))
-(print (solution-path (a-star-search *galaxy-M35*)))
+;; (print "solution path")
+;;(print (solution-path nil))
+;;(print (solution-path (a-star-search *galaxy-M35*)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; action-sequence
@@ -455,4 +399,40 @@
 (defun action-sequence (node)
   (path-of-property #'node-action node))
 
-(print (action-sequence (a-star-search *galaxy-M35*)))
+;; (print "action sequence")
+;;(print (action-sequence (a-star-search *galaxy-M35*)))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; 
+;; Exercise 10
+;; Other strategies
+;; depth first: depth first search strategy
+
+
+(defun depth-first-node-compare-p (node-1 node-2)
+  (> (node-depth node-1) (node-depth node-2)))
+
+(defparameter *depth-first*
+  (make-strategy
+    :name 'depth-first
+    :node-compare-p #'depth-first-node-compare-p))
+
+;;(print "dfs")
+;;(print (solution-path (graph-search *galaxy-M35* *depth-first*)))
+
+;;
+;; breadth first: depth first search strategy
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+(defun breadth-first-node-compare-p (node-1 node-2)
+  (< (node-depth node-1) (node-depth node-2)))
+
+(defparameter *breadth-first*
+  (make-strategy
+    :name 'breadth-first
+    :node-compare-p #'breadth-first-node-compare-p))
+
+;;(print "bfs")
+;;(print (solution-path (graph-search *galaxy-M35* *breadth-first*)))

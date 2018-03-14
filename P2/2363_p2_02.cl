@@ -321,7 +321,6 @@
   (make-node :state 'Avalon :depth 0 :g 0 :f 0) )
 (defparameter node-02
   (make-node :state 'Kentares :depth 2 :g 50 :f 50) )
-;;(defparameter lst-nodes-00)
 
 #|
 (print (insert-nodes-strategy (list node-00 node-01 node-02)
@@ -331,8 +330,25 @@
 (print (insert-nodes-strategy (list node-00 node-01 node-02)
 			      (sort (copy-list lst-nodes-00) #'<= :key #'node-g)
 			      *uniform-cost*))
-|#
 
 (print (insert-nodes-strategy '(4 8 6 2) '(1 3 5 7)
 		       (make-strategy :name 'simple
 				      :node-compare-p #'<)))
+|#
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Ejercicio 7 
+;; Definir estrategia para la búsqueda A*.
+;; Inicializa una variable global cuyo valor sea la estrategia para realizar la búsqueda A*:
+;;
+;;;;;;;;;;;;;;;;;;;;
+
+
+(defparameter *A-star*
+  (make-strategy
+    :name 'A-star
+    :node-compare-p #'node-f-<=))
+
+(defun node-f-<= (node-1 node-2)
+  (<= (node-f node-1) (node-f node-2)))

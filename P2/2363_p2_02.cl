@@ -220,6 +220,39 @@
 ;;;	OUTPUT:
 ;;;		Nodos a los que se puede ir desde el nodo expandido o NIL
 ;;;
+
+(defun get-actions (state operators)
+  (mapcan #'(lambda (operator) (funcall operator state)) operators))
+
+(defun generate-target-node (action parent f-h)
+  (let* ((state (action-final action))
+	 (depth (+ (node-depth parent) 1))
+	 (g (+ (node-g parent) (action-cost action)))
+	 (h (funcall f-h state)))
+    (make-node :state state
+	       :parent parent
+	       :action action
+	       :depth depth
+	       :g g 
+	       :h h
+	       :f (+ g h))))
+
+(defun generate-target-nodes (node f-h actions)
+  (mapcar #'(lambda (action) (generate-target-node action node f-h)) actions))
+
+(defun expand-node (node problem)
+  (generate-target-nodes node (problem-f-h problem) (get-actions (node-state node) (problem-operators problem))))
+
+#|
+(print "Expand nodes")
+(print (expand-node (make-node :state 'Kentares :depth 0 :g 0 :f 0) *galaxy-M35*))
+(print (expand-node node-00 *galaxy-M35*))	;->Caso tipico	;->
+(setf node-08 (make-node :state 'Tierra :depth 1 :g 1 :f 2))
+(print (expand-node node-08 *galaxy-M35*))	;->NIL	;->Caso especial
+|#
+
+
+#|
 (defun expand-node (node problem)
   (if (null node)
     NIL
@@ -273,11 +306,9 @@
 
 ;;;
 ;;;	EJEMPLOS:
-;;;		(expand-node node-00 *galaxy-M35*)	;->Caso tipico	;->
-;;;		(setf node-08 (make-node :state 'Tierra :depth 1 :g 1 :f 2))
-;;;			(expand-node node-08 *galaxy-M35*)	;->NIL	;->Caso especial
 ;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+|#
 
 (defun node-g-<= (node-1 node-2)
   (<= (node-g node-1)
@@ -300,10 +331,10 @@
   (cond
     ((null lst-nodes)
      (list node))
-     ((funcall (strategy-node-compare-p strategy) node (first lst-nodes))
-      (cons node lst-nodes))
-     (t 
-       (cons (first lst-nodes) (insert-node-strategy node (rest lst-nodes) strategy)))))
+    ((funcall (strategy-node-compare-p strategy) node (first lst-nodes))
+     (cons node lst-nodes))
+    (t 
+      (cons (first lst-nodes) (insert-node-strategy node (rest lst-nodes) strategy)))))
 
 #|
 (print "insert node")
@@ -332,8 +363,8 @@
 			      *uniform-cost*))
 
 (print (insert-nodes-strategy '(4 8 6 2) '(1 3 5 7)
-		       (make-strategy :name 'simple
-				      :node-compare-p #'<)))
+			      (make-strategy :name 'simple
+					     :node-compare-p #'<)))
 |#
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -344,11 +375,84 @@
 ;;
 ;;;;;;;;;;;;;;;;;;;;
 
+(defun node-f-<= (node-1 node-2)
+  (<= (node-f node-1) (node-f node-2)))
 
 (defparameter *A-star*
   (make-strategy
     :name 'A-star
     :node-compare-p #'node-f-<=))
 
-(defun node-f-<= (node-1 node-2)
-  (<= (node-f node-1) (node-f node-2)))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Ejercicio 8
+;; Busqueda
+;; problem: problem to solve
+;; strategy: the strategy to solve the search with
+;; returns: the optimal path through the graph
+;;
+;;;;;;;;;;;
+
+(defun fulfills-goal-test (problem node)
+  (funcall (problem-f-goal-test problem) node))
+
+(defun get-node-if-available (node node-list)
+  (first (member node node-list)))
+
+(defun expand-and-merge (node node-list problem strategy)
+  (insert-nodes-strategy (expand-node node problem) node-list strategy))
+
+(defun graph-search-aux (open-nodes closed-nodes problem strategy)
+  (if (null open-nodes)
+    nil
+    (let ((current-node (first open-nodes)))
+      (if (fulfills-goal-test problem current-node)
+	current-node
+	(let ((node-in-list (get-node-if-available current-node closed-nodes)))
+	  (if (or (null node-in-list) (< (node-g current-node) (node-g node-in-list)))
+	    (graph-search-aux (expand-and-merge current-node open-nodes problem strategy) (cons current-node closed-nodes) problem strategy)
+	    (graph-search-aux (rest open-nodes) closed-nodes problem strategy)))))))
+
+(defun graph-search (problem strategy)
+  (graph-search-aux (list (make-node :state (problem-initial-state problem) :depth 0 :g 0)) '() problem strategy))
+
+
+;;(print (graph-search *galaxy-M35* *A-star*))
+
+(defun a-star-search (problem) 
+  (graph-search problem *A-star*))
+
+;;(print (a-star-search *galaxy-M35*))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;
+;; Ejercicio 9
+;; Solution-path
+;; Function which shows the way take to the node from the start
+;; node: endnode
+;; returns: name of the states visited
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun path-of-property (getter node)
+(if (null node)
+    nil
+    (append (path-of-property getter (node-parent node)) (list (funcall getter node)))))
+
+(defun solution-path (node)
+  (path-of-property #'node-state node))
+
+(print (solution-path nil))
+(print (solution-path (a-star-search *galaxy-M35*)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; action-sequence
+;; Function which shows the sequence of actions taken to the node from the start
+;; node: endnode
+;; returns: actions executed
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun action-sequence (node)
+  (path-of-property #'node-action node))
+
+(print (action-sequence (a-star-search *galaxy-M35*)))

@@ -173,6 +173,7 @@
 (defun f-goal-test-galaxy (node planets-destination planets-mandatory)
   (and (find (node-state node) planets-destination) (visited planets-mandatory node)))
 
+;; todo
 (defparameter node-01
   (make-node :state 'Avalon) )
 (defparameter node-02
@@ -188,6 +189,54 @@
 (print (null (f-goal-test-galaxy node-03 '(Kentares Uranus) '(Avalon Katril))))
 (print (f-goal-test-galaxy node-04 '(Kentares Uranus) '(Avalon Katril)))
 |#
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; f-search-state-equal-galaxy
+;;
+;; tests whether two nodes are equa in respect to
+;; 	- same planet
+;;	- still have to visit the same mandatory nodes
+;;
+;; node-1: node 1
+;; node-2: node 2
+;; &optional planets-mandatory: planets which need to be visited
+
+(defun get-not-visited-planets (node planets)
+  (cond
+    ((null planets)
+     nil)
+    ((null node)
+     planets)
+    (t
+      (if (find (node-state node) planets :test #'equal)
+	(get-not-visited-planets (node-parent node) (remove-if #'(lambda (planet) (equal planet (node-state node))) planets))
+	(get-not-visited-planets (node-parent node) planets)))))
+
+(defun f-search-state-equal-galaxy (node-1 node-2 &optional planets-mandatory)
+  (cond
+    ((not (equal (node-state node-1) (node-state node-2)))
+    nil)
+    ((null planets-mandatory)
+     t)
+    (t
+      (let ((planets-missing-1 (get-not-visited-planets node-1 planets-mandatory))
+	    (planets-missing-2 (get-not-visited-planets node-2 planets-mandatory)))
+      (and (null (set-difference planets-missing-1 planets-missing-2)) (null (set-difference planets-missing-2 planets-missing-1)))))))
+
+#|
+(print "f-search-state-equal-galaxy")
+(print (f-search-state-equal-galaxy node-01 node-01)) ;-> T
+(print (null (f-search-state-equal-galaxy node-01 node-02))) ;-> NIL
+(print (f-search-state-equal-galaxy node-02 node-04)) ;-> T
+(print (f-search-state-equal-galaxy node-01 node-01 '(Avalon))) ;-> T
+(print (null (f-search-state-equal-galaxy node-01 node-02 '(Avalon)))) ;-> NIL
+(print (f-search-state-equal-galaxy node-02 node-04 '(Avalon))) ;-> T
+(print (f-search-state-equal-galaxy node-01 node-01 '(Avalon Katril))) ;-> T
+(print (null (f-search-state-equal-galaxy node-01 node-02 '(Avalon Katril)))) ;-> NIL
+(print (null (f-search-state-equal-galaxy node-02 node-04 '(Avalon Katril)))) ;-> NIL
+|#
+
 
 (defun navigate-white-hole-aux (state)
   (navigate-white-hole state *white-holes*))

@@ -253,6 +253,7 @@
 						*planets-mandatory*))
     :f-h		#'(lambda (node)
 			    (second (assoc node *sensors*)))
+    :f-search-state-equal #'(lambda (node-1 node-2) f-search-state-equal-galaxy node-1 node-1 *planets-mandatory*)
     :operators	(list 'navigate-worm-hole-aux 'navigate-white-hole-aux)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;EJERCICIO5;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -295,13 +295,17 @@
 (defun expand-node (node problem)
   (generate-target-nodes node (problem-f-h problem) (get-actions (node-state node) (problem-operators problem))))
 
-#|
-(print "Expand nodes")
-(print (expand-node (make-node :state 'Kentares :depth 0 :g 0 :f 0) *galaxy-M35*))
-(print (expand-node node-00 *galaxy-M35*))	;->Caso tipico	;->
-(setf node-08 (make-node :state 'Tierra :depth 1 :g 1 :f 2))
-(print (expand-node node-08 *galaxy-M35*))	;->NIL	;->Caso especial
-|#
+(defparameter lst-nodes-00
+  (expand-node node-00 *galaxy-M35*))
+
+;;(print "Expand nodes")
+;;(print (expand-node (make-node :state 'Kentares :depth 0 :g 0 :f 0) *galaxy-M35*))
+;;(print (expand-node node-00 *galaxy-M35*))	;->Caso tipico	;->
+;;(setf node-08 (make-node :state 'Tierra :depth 1 :g 1 :f 2))
+;;(print (expand-node node-08 *galaxy-M35*))	;->NIL	;->Caso especial
+;;(print lst-nodes-00)
+
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -331,12 +335,10 @@
     (t 
       (cons (first lst-nodes) (insert-node-strategy node (rest lst-nodes) strategy)))))
 
-#|
 (print "insert node")
 (print (insert-node-strategy (make-node :g 3) (list (make-node :g 4)) *uniform-cost*))
 (print (insert-node-strategy (make-node :g 3) (list (make-node :g 1) (make-node :g 2) (make-node :g 4)) *uniform-cost*))
 (print (insert-node-strategy (make-node :g 3) (list (make-node :g 1) (make-node :g 2) (make-node :g 2)) *uniform-cost*))
-|#
 
 (defun insert-nodes-strategy (nodes lst-nodes strategy)
   (if (null nodes)
@@ -348,11 +350,11 @@
 (defparameter node-02
   (make-node :state 'Kentares :depth 2 :g 50 :f 50) )
 
-#|
+(print "insert nodes")
 (print (insert-nodes-strategy (list node-00 node-01 node-02)
-			      lst-nodes-00
+			      (sort lst-nodes-00 #'node-g-<=)
 			      *uniform-cost*))
-
+#|
 (print (insert-nodes-strategy (list node-00 node-01 node-02)
 			      (sort (copy-list lst-nodes-00) #'<= :key #'node-g)
 			      *uniform-cost*))

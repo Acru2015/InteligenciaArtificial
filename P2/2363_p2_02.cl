@@ -42,12 +42,14 @@
   states              	; List of states
   initial-state       	; Initial state
   f-goal-test		; reference to a function that determines whether 
-  ; a state fulfills the goal 
+			; a state fulfills the goal 
   f-h                 	; reference to a function that evaluates to the 
-  ; value of the heuristic of a state
+			  ; value of the heuristic of a state
+  f-search-state-equal	; reference to a predicate that determines whether
+  			; two nodes are equal, in terms of their search state
   operators)    	; list of operators (references to functions) 
-; to generate actions, which, in their turn, are 
-; used to generate succesors
+			; to generate actions, which, in their turn, are 
+			; used to generate succesors
 ;;
 ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

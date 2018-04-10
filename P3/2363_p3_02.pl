@@ -40,7 +40,7 @@ insert(X-P, [Y-P1|Ls], R) :-
 	concatena([Y-P1], T, R).
 
 
-%Ejercicio 4
+%Ejercicio 4.1
 
 elem_count(_, [], 0).
 
@@ -51,3 +51,12 @@ elem_count(X, [X|Ls], Xn) :-
 elem_count(X, [Y|Ls], Xn) :-
 	Y \= X,
 	elem_count(X, Ls, Xn).
+
+
+%Ejercicio 4.2
+
+list_count([], _, []).
+
+list_count([X|Xs], L2, [X-V|L3]) :-
+	elem_count(X, L2, V),
+	list_count(Xs, L2, L3).

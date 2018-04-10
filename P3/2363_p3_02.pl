@@ -38,3 +38,16 @@ insert(X-P, [Y-P1|Ls], R) :-
 	P > P1,
 	insert(X-P, Ls, T),
 	concatena([Y-P1], T, R).
+
+
+%Ejercicio 4
+
+elem_count(_, [], 0).
+
+elem_count(X, [X|Ls], Xn) :-
+	elem_count(X, Ls, Xp),
+	Xn is Xp + 1.
+
+elem_count(X, [Y|Ls], Xn) :-
+	Y \= X,
+	elem_count(X, Ls, Xn).

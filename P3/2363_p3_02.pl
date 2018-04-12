@@ -80,3 +80,24 @@ build_tree([X-_, Y-_], tree(1, tree(X, nil, nil), tree(Y, nil, nil))).
 
 build_tree([X-_|Ls], tree(1, tree(X, nil, nil), SubTree)) :-
 	build_tree(Ls, SubTree).
+
+
+%Ejercicio 7.1
+
+encode_elem(X, [], tree(X, nil, nil)).
+
+encode_elem(X, [0], tree(1, tree(X, _, _) , _)).
+
+encode_elem(X, [1|R], tree(1, tree(Y, _, _), SubTree)) :-
+	X \= Y,
+	encode_elem(X, R, SubTree).
+	
+
+%Ejercicio 7.2
+
+encode_list([X], [Y], T) :-
+	encode_elem(X, Y, T).
+
+encode_list([X|Ls], [Y|Rs], T) :-
+	encode_elem(X, Y, T),
+	encode_list(Ls, Rs, T).

@@ -65,7 +65,7 @@ list_count([X|Xs], L2, [X-V|L3]) :-
 %Ejercicio 5
 
 sort_list(List,Sorted):-
-	i_sort(List,[],Sorted).
+	i_sort(List, [], Sorted).
 
 i_sort([], Acc, Acc).
 
@@ -73,3 +73,10 @@ i_sort([H|T], Acc, Sorted):-
 	insert(H, Acc, NAcc),
 	i_sort(T, NAcc, Sorted).
 	
+
+%Ejercicio 6
+
+build_tree([X-_, Y-_], tree(1, tree(X, nil, nil), tree(Y, nil, nil))).
+
+build_tree([X-_|Ls], tree(1, tree(X, nil, nil), SubTree)) :-
+	build_tree(Ls, SubTree).

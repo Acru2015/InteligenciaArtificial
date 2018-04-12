@@ -60,3 +60,16 @@ list_count([], _, []).
 list_count([X|Xs], L2, [X-V|L3]) :-
 	elem_count(X, L2, V),
 	list_count(Xs, L2, L3).
+
+
+%Ejercicio 5
+
+sort_list(List,Sorted):-
+	i_sort(List,[],Sorted).
+
+i_sort([], Acc, Acc).
+
+i_sort([H|T], Acc, Sorted):-
+	insert(H, Acc, NAcc),
+	i_sort(T, NAcc, Sorted).
+	

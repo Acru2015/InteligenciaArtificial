@@ -1,3 +1,4 @@
+/**/
 %Ejercicio 1
 pertenece(X, [X|_]).
 pertenece(X, [_|Rs]) :- pertenece(X, Rs).
@@ -101,3 +102,15 @@ encode_list([X], [Y], T) :-
 encode_list([X|Ls], [Y|Rs], T) :-
 	encode_elem(X, Y, T),
 	encode_list(Ls, Rs, T).
+
+%Ejercicio 8
+
+dictionary([a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z]).
+
+encode(Text, Result) :-
+	dictionary(X),
+	list_count(X, Text, Occurences),
+	sort_list(Occurences, OccurencesSorted),
+	invierte(OccurencesSorted, OccurencesDesc),
+	build_tree(OccurencesDesc, Tree),
+	encode_list(Text, Result, Tree).
